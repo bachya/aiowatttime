@@ -1,4 +1,4 @@
-# 🌎 aiowatttime: an asyncio-based, Python3 library for LOOK.in devices
+# 🌎 aiowatttime: an asyncio-based, Python3 library for WattTime emissions data
 
 [![CI](https://github.com/bachya/aiowatttime/workflows/CI/badge.svg)](https://github.com/bachya/aiowatttime/actions)
 [![PyPi](https://img.shields.io/pypi/v/aiowatttime.svg)](https://pypi.python.org/pypi/aiowatttime)
@@ -42,7 +42,7 @@ from aiowatttime import async_get_client
 
 
 async def main() -> None:
-    device = await async_get_client("<USERNAME>", "<PASSWORD>")
+    client = await async_get_client("<USERNAME>", "<PASSWORD>")
 
     # ...
 
@@ -50,7 +50,7 @@ async def main() -> None:
 asyncio.run(main())
 ```
 
-By default, the library creates a new connection to the device with each coroutine. If
+By default, the library creates a new connection to the API with each coroutine. If
 you are calling a large number of coroutines (or merely want to squeeze out every second
 of runtime savings possible), an
 [`aiohttp`](https://github.com/aio-libs/aiohttp) `ClientSession` can be used for connection
@@ -66,7 +66,7 @@ from aiowatttime import async_get_client
 
 async def main() -> None:
     async with ClientSession() as session:
-        device = await async_get_client("<USERNAME>", "<PASSWORD>", session=session)
+        client = await async_get_client("<USERNAME>", "<PASSWORD>", session=session)
 
         # ...
 
