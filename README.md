@@ -1,11 +1,11 @@
-# 🌎 aiowatttime: an asyncio-based, Python3 library for LOOK.in devices
+# 🌎 aiowatttime: an asyncio-based, Python3 library for WattTime emissions data
 
 [![CI](https://github.com/bachya/aiowatttime/workflows/CI/badge.svg)](https://github.com/bachya/aiowatttime/actions)
 [![PyPi](https://img.shields.io/pypi/v/aiowatttime.svg)](https://pypi.python.org/pypi/aiowatttime)
 [![Version](https://img.shields.io/pypi/pyversions/aiowatttime.svg)](https://pypi.python.org/pypi/aiowatttime)
 [![License](https://img.shields.io/pypi/l/aiowatttime.svg)](https://github.com/bachya/aiowatttime/blob/master/LICENSE)
 [![Code Coverage](https://codecov.io/gh/bachya/aiowatttime/branch/master/graph/badge.svg)](https://codecov.io/gh/bachya/aiowatttime)
-[![Maintainability](https://api.codeclimate.com/v1/badges/a683f20d63d4735ceede/maintainability)](https://codeclimate.com/github/bachya/aiowatttime/maintainability)
+[![Maintainability](https://api.codeclimate.com/v1/badges/781e64940b1302ae9ac3/maintainability)](https://codeclimate.com/github/bachya/aiowatttime/maintainability)
 [![Say Thanks](https://img.shields.io/badge/SayThanks-!-1EAEDB.svg)](https://saythanks.io/to/bachya)
 
 `aiowatttime` is a Python 3, asyncio-friendly library for interacting with
@@ -33,7 +33,47 @@ pip install aiowatttime
 
 # Usage
 
-Coming soon!
+## Setup
+
+```python
+import asyncio
+
+from aiowatttime import async_get_client
+
+
+async def main() -> None:
+    client = await async_get_client("<USERNAME>", "<PASSWORD>")
+
+    # ...
+
+
+asyncio.run(main())
+```
+
+By default, the library creates a new connection to the API with each coroutine. If
+you are calling a large number of coroutines (or merely want to squeeze out every second
+of runtime savings possible), an
+[`aiohttp`](https://github.com/aio-libs/aiohttp) `ClientSession` can be used for connection
+pooling:
+
+```python
+import asyncio
+
+from aiohttp import ClientSession
+
+from aiowatttime import async_get_client
+
+
+async def main() -> None:
+    async with ClientSession() as session:
+        client = await async_get_client("<USERNAME>", "<PASSWORD>", session=session)
+
+        # ...
+
+
+asyncio.run(main())
+```
+
 
 # Contributing
 
