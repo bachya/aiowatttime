@@ -35,23 +35,28 @@ pip install aiowatttime
 
 ## Getting an API Key
 
-API keys can be retrieved by following the instructions in the
-[WattTime API Reference](https://www.watttime.org/api-documentation).
+Simply clone this repo and run the included interactive script:
+
+```bash
+$ script/register
+```
 
 Note that WattTime offers three plans: Visitors, Analyst, and Pro. The type you use
 will determine which elements of this library are available to use. You can read more
 details here: https://www.watttime.org/get-the-data/data-plans/
 
-## Setup
+## Creating and Using a Client
+
+The `Client` is the primary method of interacting with the API:
 
 ```python
 import asyncio
 
-from aiowatttime import async_get_client
+from aiowatttime import Client
 
 
 async def main() -> None:
-    client = await async_get_client("<USERNAME>", "<PASSWORD>")
+    client = await Client.login("<USERNAME>", "<PASSWORD>")
     # ...
 
 
@@ -59,8 +64,7 @@ asyncio.run(main())
 ```
 
 By default, the library creates a new connection to the API with each coroutine. If
-you are calling a large number of coroutines (or merely want to squeeze out every second
-of runtime savings possible), an
+you are calling a large number of coroutines (or merely want to squeeze out every second of runtime savings possible), an
 [`aiohttp`](https://github.com/aio-libs/aiohttp) `ClientSession` can be used for connection
 pooling:
 
@@ -69,12 +73,12 @@ import asyncio
 
 from aiohttp import ClientSession
 
-from aiowatttime import async_get_client
+from aiowatttime import Client
 
 
 async def main() -> None:
     async with ClientSession() as session:
-        client = await async_get_client("<USERNAME>", "<PASSWORD>", session=session)
+        client = await Client.login("<USERNAME>", "<PASSWORD>", session=session)
         # ...
 
 

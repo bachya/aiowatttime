@@ -13,19 +13,64 @@ API_BASE_URL = "https://api2.watttime.org/v2"
 DEFAULT_TIMEOUT = 10
 
 
-class Client:  # pylint: disable=too-few-public-methods
+class Client:
     """Define the client."""
 
-    def __init__(
-        self, username: str, password: str, *, session: Optional[ClientSession] = None
-    ) -> None:
-        """Initialize."""
-        self._password = password
-        self._session = session
-        self._token: Optional[str] = None
-        self._username = username
+    def __init__(self, *, session: Optional[ClientSession] = None) -> None:
+        """Initialize.
 
-    async def _async_request(
+        Note that this is not intended to be instantiated directly; instead, users
+        should use the async_login and async_register_new_username class methods.
+        """
+        self._session = session
+
+        # Intended to be populated by async_authenticate():
+        self._token: Optional[str] = None
+
+        # Intended to be populated by async_login():
+        self._password: Optional[str] = None
+        self._username: Optional[str] = None
+
+    @classmethod
+    async def async_login(
+        cls, username: str, password: str, *, session: Optional[ClientSession] = None
+    ) -> "Client":
+        """Get a fully initialized API client."""
+        client = cls(session=session)
+        client._username = username
+        client._password = password
+        await client.async_authenticate()
+        return client
+
+    @classmethod
+    async def async_register_new_username(
+        cls,
+        username: str,
+        password: str,
+        email: str,
+        organization: str,
+        *,
+        session: Optional[ClientSession] = None,
+    ) -> Dict[str, Any]:
+        """Get a fully initialized API client."""
+        client = cls(session=session)
+        return await client.async_request(
+            "post",
+            "register",
+            json={
+                "username": username,
+                "password": password,
+                "email": email,
+                "org": organization,
+            },
+        )
+
+    async def async_authenticate(self) -> None:
+        """Retrieve and store a new access token."""
+        token_resp = await self.async_request("get", "login")
+        self._token = token_resp["token"]
+
+    async def async_request(
         self, method: str, endpoint: str, **kwargs: Dict[str, Any]
     ) -> Dict[str, Any]:
         """Make an API request."""
@@ -59,20 +104,6 @@ class Client:  # pylint: disable=too-few-public-methods
 
         return data
 
-    async def async_login(self) -> None:
-        """Retrieve and store a new access token."""
-        token_resp = await self._async_request("get", "login")
-        self._token = token_resp["token"]
-
     async def async_request_password_reset(self) -> None:
         """Ask the API to send a password reset email."""
-        await self._async_request("get", "password")
-
-
-async def async_get_client(
-    username: str, password: str, *, session: Optional[ClientSession] = None
-) -> Client:
-    """Get a fully initialized API client."""
-    client = Client(username, password, session=session)
-    await client.async_login()
-    return client
+        await self.async_request("get", "password")

@@ -1,2 +1,2 @@
 """Define the aiowatttime package."""
-from .client import async_get_client  # noqa
+from .client import Client  # noqa
