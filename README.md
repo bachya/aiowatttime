@@ -33,6 +33,15 @@ pip install aiowatttime
 
 # Usage
 
+## Getting an API Key
+
+API keys can be retrieved by following the instructions in the
+[WattTime API Reference](https://www.watttime.org/api-documentation).
+
+Note that WattTime offers three plans: Visitors, Analyst, and Pro. The type you use
+will determine which elements of this library are available to use. You can read more
+details here: https://www.watttime.org/get-the-data/data-plans/
+
 ## Setup
 
 ```python
@@ -72,6 +81,12 @@ async def main() -> None:
 
 
 asyncio.run(main())
+```
+
+## Programmatically Requesting a Password Reset
+
+```python
+await client.async_request_password_reset()
 ```
 
 
