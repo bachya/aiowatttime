@@ -99,3 +99,36 @@ async def test_get_new_token(aresponses, login_response):
         assert client._token == TEST_TOKEN
         await client.async_login()
         assert client._token == TEST_TOKEN_2
+
+
+@pytest.mark.asyncio
+async def test_request_password_reset_fail(
+    aresponses, login_response, password_reset_fail_response
+):
+    """Test that a failed password reset request is handled correctly."""
+    aresponses.add(
+        "api2.watttime.org",
+        "/v2/login",
+        "get",
+        aresponses.Response(
+            text=json.dumps(login_response),
+            status=200,
+            headers={"Content-Type": "application/json; charset=utf-8"},
+        ),
+    )
+    aresponses.add(
+        "api2.watttime.org",
+        "/v2/password",
+        "get",
+        aresponses.Response(
+            text=json.dumps(password_reset_fail_response),
+            status=400,
+            headers={"Content-Type": "application/json; charset=utf-8"},
+        ),
+    )
+
+    async with aiohttp.ClientSession() as session:
+        client = await async_get_client(TEST_USERNAME, TEST_PASSWORD, session=session)
+        with pytest.raises(RequestError) as err:
+            await client.async_request_password_reset()
+        assert "A problem occurred, your request could not be processed" in str(err)

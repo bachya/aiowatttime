@@ -1,11 +1,12 @@
 """Define an API client."""
+import json
 from typing import Any, Dict, Optional
 
 from aiohttp import ClientSession, ClientTimeout
 from aiohttp.client_exceptions import ClientError
 
 from .const import LOGGER
-from .errors import RequestError
+from .errors import raise_error
 
 API_BASE_URL = "https://api2.watttime.org/v2"
 
@@ -46,10 +47,10 @@ class Client:  # pylint: disable=too-few-public-methods
 
         try:
             async with session.request(method, url, **kwargs) as resp:
-                resp.raise_for_status()
                 data = await resp.json()
-        except ClientError as err:
-            raise RequestError(f"Error while requesting {url}: {err}") from err
+                resp.raise_for_status()
+        except (ClientError, json.decoder.JSONDecodeError) as err:
+            raise_error(endpoint, data, err)
         finally:
             if not use_running_session:
                 await session.close()
@@ -62,6 +63,10 @@ class Client:  # pylint: disable=too-few-public-methods
         """Retrieve and store a new access token."""
         token_resp = await self._async_request("get", "login")
         self._token = token_resp["token"]
+
+    async def async_request_password_reset(self) -> None:
+        """Ask the API to send a password reset email."""
+        await self._async_request("get", "password")
 
 
 async def async_get_client(
