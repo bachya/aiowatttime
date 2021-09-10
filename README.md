@@ -52,7 +52,6 @@ from aiowatttime import async_get_client
 
 async def main() -> None:
     client = await async_get_client("<USERNAME>", "<PASSWORD>")
-
     # ...
 
 
@@ -76,7 +75,6 @@ from aiowatttime import async_get_client
 async def main() -> None:
     async with ClientSession() as session:
         client = await async_get_client("<USERNAME>", "<PASSWORD>", session=session)
-
         # ...
 
 
@@ -84,6 +82,8 @@ asyncio.run(main())
 ```
 
 ## Programmatically Requesting a Password Reset
+
+To request that WattTime email you password reset instructions:
 
 ```python
 await client.async_request_password_reset()
