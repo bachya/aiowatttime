@@ -1,7 +1,9 @@
 """Define an API client."""
-from typing import Any, Dict, List, Optional, TypedDict, Union, cast
+from __future__ import annotations
 
-from aiohttp import ClientSession, ClientTimeout
+from typing import Any, TypedDict, cast
+
+from aiohttp import BasicAuth, ClientSession, ClientTimeout
 from aiohttp.client_exceptions import ClientError, ContentTypeError
 
 from .const import LOGGER
@@ -29,7 +31,7 @@ class TokenResponseType(TypedDict):
 class Client:
     """Define the client."""
 
-    def __init__(self, *, session: Optional[ClientSession] = None) -> None:
+    def __init__(self, *, session: ClientSession | None = None) -> None:
         """Initialize.
 
         Note that this is not intended to be instantiated directly; instead, users
@@ -38,17 +40,17 @@ class Client:
         self._session = session
 
         # Intended to be populated by async_authenticate():
-        self._token: Optional[str] = None
+        self._token: str | None = None
 
         # Intended to be populated by async_login():
-        self._password: Optional[str] = None
-        self._username: Optional[str] = None
+        self._password: str | None = None
+        self._username: str | None = None
 
         self.emissions = EmissionsAPI(self._async_request)
 
     @classmethod
     async def async_login(
-        cls, username: str, password: str, *, session: Optional[ClientSession] = None
+        cls, username: str, password: str, *, session: ClientSession | None = None
     ) -> "Client":
         """Get a fully initialized API client."""
         client = cls(session=session)
@@ -65,7 +67,7 @@ class Client:
         email: str,
         organization: str,
         *,
-        session: Optional[ClientSession] = None,
+        session: ClientSession | None = None,
     ) -> RegisterNewUserResponseType:
         """Get a fully initialized API client."""
         client = cls(session=session)
@@ -82,8 +84,8 @@ class Client:
         return cast(RegisterNewUserResponseType, data)
 
     async def _async_request(
-        self, method: str, endpoint: str, **kwargs: Dict[str, Any]
-    ) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
+        self, method: str, endpoint: str, **kwargs: dict[str, Any]
+    ) -> dict[str, Any] | list[dict[str, Any]]:
         """Make an API request."""
         url = f"{API_BASE_URL}/{endpoint}"
 
@@ -99,7 +101,7 @@ class Client:
 
         assert session
 
-        data: Union[Dict[str, Any], List[Dict[str, Any]]] = {}
+        data: dict[str, Any] | list[dict[str, Any]] = {}
 
         try:
             async with session.request(method, url, **kwargs) as resp:
@@ -118,7 +120,12 @@ class Client:
 
     async def async_authenticate(self) -> None:
         """Retrieve and store a new access token."""
-        token_resp = cast(TokenResponseType, await self._async_request("get", "login"))
+        token_resp = cast(
+            TokenResponseType,
+            await self._async_request(
+                "get", "login", auth=BasicAuth(self._username, password=self._password)
+            ),
+        )
         self._token = token_resp["token"]
 
     async def async_request_password_reset(self) -> None:

@@ -1,6 +1,8 @@
 """Define an API endpoint manager for emissions data."""
+from __future__ import annotations
+
 from datetime import datetime
-from typing import Awaitable, Callable, List, Optional, TypedDict, cast
+from typing import Awaitable, Callable, TypedDict, cast
 
 DEFAULT_MOER_VERSION = "3.0"
 
@@ -18,7 +20,7 @@ class ForecastedEmissionsResponseType(TypedDict):
     """Define a type for a response to async_get_forecasted_emissions."""
 
     generated_at: str
-    forecast: List[EmissionForecast]
+    forecast: list[EmissionForecast]
 
 
 class GridRegionResponseType(TypedDict):
@@ -71,8 +73,8 @@ class EmissionsAPI:
         self,
         balancing_authority_abbreviation: str,
         *,
-        start_datetime: Optional[datetime] = None,
-        end_datetime: Optional[datetime] = None,
+        start_datetime: datetime | None = None,
+        end_datetime: datetime | None = None,
     ) -> RealTimeEmissionsResponseType:
         """Return the forecasted emissions for a latitude/longitude."""
         if start_datetime and not end_datetime or end_datetime and not start_datetime:
@@ -91,8 +93,8 @@ class EmissionsAPI:
         latitude: str,
         longitude: str,
         *,
-        start_datetime: Optional[datetime] = None,
-        end_datetime: Optional[datetime] = None,
+        start_datetime: datetime | None = None,
+        end_datetime: datetime | None = None,
         moer_version: str = DEFAULT_MOER_VERSION,
     ) -> HistoricalEmissionsResponseType:
         """Return the historical emissions for a latitude/longitude."""
