@@ -1,16 +1,29 @@
 """Define an API client."""
-import json
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional, TypedDict, Union, cast
 
 from aiohttp import ClientSession, ClientTimeout
-from aiohttp.client_exceptions import ClientError
+from aiohttp.client_exceptions import ClientError, ContentTypeError
 
 from .const import LOGGER
+from .emissions import EmissionsAPI
 from .errors import raise_error
 
 API_BASE_URL = "https://api2.watttime.org/v2"
 
 DEFAULT_TIMEOUT = 10
+
+
+class RegisterNewUserResponseType(TypedDict):
+    """Define a type for a response to async_register_new_username."""
+
+    ok: str
+    user: str
+
+
+class TokenResponseType(TypedDict):
+    """Define a type for a response to async_authenticate."""
+
+    token: str
 
 
 class Client:
@@ -30,6 +43,8 @@ class Client:
         # Intended to be populated by async_login():
         self._password: Optional[str] = None
         self._username: Optional[str] = None
+
+        self.emissions = EmissionsAPI(self._async_request)
 
     @classmethod
     async def async_login(
@@ -51,10 +66,10 @@ class Client:
         organization: str,
         *,
         session: Optional[ClientSession] = None,
-    ) -> Dict[str, Any]:
+    ) -> RegisterNewUserResponseType:
         """Get a fully initialized API client."""
         client = cls(session=session)
-        return await client.async_request(
+        data = await client._async_request(
             "post",
             "register",
             json={
@@ -64,15 +79,11 @@ class Client:
                 "org": organization,
             },
         )
+        return cast(RegisterNewUserResponseType, data)
 
-    async def async_authenticate(self) -> None:
-        """Retrieve and store a new access token."""
-        token_resp = await self.async_request("get", "login")
-        self._token = token_resp["token"]
-
-    async def async_request(
+    async def _async_request(
         self, method: str, endpoint: str, **kwargs: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    ) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
         """Make an API request."""
         url = f"{API_BASE_URL}/{endpoint}"
 
@@ -88,13 +99,14 @@ class Client:
 
         assert session
 
-        data: Dict[str, Any] = {}
+        data: Union[Dict[str, Any], List[Dict[str, Any]]] = {}
 
         try:
             async with session.request(method, url, **kwargs) as resp:
                 data = await resp.json()
                 resp.raise_for_status()
-        except (ClientError, json.decoder.JSONDecodeError) as err:
+        except (ClientError, ContentTypeError) as err:
+            assert isinstance(data, dict)
             raise_error(endpoint, data, err)
         finally:
             if not use_running_session:
@@ -104,6 +116,11 @@ class Client:
 
         return data
 
+    async def async_authenticate(self) -> None:
+        """Retrieve and store a new access token."""
+        token_resp = cast(TokenResponseType, await self._async_request("get", "login"))
+        self._token = token_resp["token"]
+
     async def async_request_password_reset(self) -> None:
         """Ask the API to send a password reset email."""
-        await self.async_request("get", "password")
+        await self._async_request("get", "password")

@@ -1,0 +1,4 @@
+{
+  "error": "Invalid query parameters",
+  "message": "Invalid scope. You do not have sufficient access to this resource. See https://api.watttime.org/plans/ for more information or email contact@watttime.org for pricing. Please note that all users are allowed free access to CAISO_ZP26."
+}
