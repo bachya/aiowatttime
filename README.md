@@ -35,30 +35,11 @@ pip install aiowatttime
 
 ## Getting an API Key
 
-Getting an API key is done 100% programmatically:
+Simply clone this repo and run the included interactive script:
 
-```python
-import asyncio
-
-from aiowatttime import Client
-
-
-async def main() -> None:
-    await Client.async_register_new_username(
-        "<USERNAME>",
-        "<PASSWORD>",
-        "<EMAIL>",
-        # This organization can be anything; don't worry if you don't own a company!
-        "<ORGANIZATION>",
-    )
-    # >>> { "user": "<USERNAME>", "ok": "User created" }
-
-
-asyncio.run(main())
+```bash
+$ script/register
 ```
-
-This same functionality is also offered within the `scripts/register` script contained
-inside this repo.
 
 Note that WattTime offers three plans: Visitors, Analyst, and Pro. The type you use
 will determine which elements of this library are available to use. You can read more
