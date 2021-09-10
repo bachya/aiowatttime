@@ -120,6 +120,7 @@ class Client:
 
     async def async_authenticate(self) -> None:
         """Retrieve and store a new access token."""
+        self._token = None
         token_resp = cast(
             TokenResponseType,
             await self._async_request(
