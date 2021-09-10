@@ -1,11 +1,6 @@
 """Define common test utilities."""
 import os
 
-TEST_PASSWORD = "pass"
-TEST_TOKEN = "abcd1234"
-TEST_TOKEN_2 = "efgh5678"
-TEST_USERNAME = "user"
-
 
 def load_fixture(filename):
     """Load a fixture."""

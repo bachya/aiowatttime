@@ -1,0 +1,28 @@
+#!/usr/bin/env python
+"""Register a new user."""
+import asyncio
+import sys
+
+from aiowatttime import Client
+from aiowatttime.errors import RequestError
+
+
+async def main() -> None:
+    """Run!"""
+    try:
+        username = input("What is your desired username? ")
+        password = input("What is your desired password? ")
+        email = input("What is your email address? ")
+        organization = input('What "organization" do you want to register with ? ')
+
+        await Client.async_register_new_username(
+            username, password, email, organization
+        )
+    except RequestError as err:
+        print(str(err))
+        sys.exit(0)
+    except KeyboardInterrupt:
+        sys.exit(0)
+
+
+asyncio.run(main())

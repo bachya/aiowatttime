@@ -20,4 +20,4 @@ def raise_error(endpoint: str, data: Dict[str, Any], err: Exception) -> None:
         msg = data["error"]
     else:
         msg = str(err)
-    raise RequestError(f"Error while requesting {endpoint}: {msg}") from err
+    raise RequestError(f"Error while requesting /{endpoint}: {msg}") from err
