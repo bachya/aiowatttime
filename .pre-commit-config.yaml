@@ -25,6 +25,7 @@ repos:
         args:
           - --skip="./.*,*.json"
           - --quiet-level=4
+          - -L ba
         exclude_types: [json]
   - repo: https://gitlab.com/pycqa/flake8
     rev: 3.7.9
@@ -42,7 +43,7 @@ repos:
           - toml
         files: ^(aiowatttime|tests)/.+\.py$
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v0.790
+    rev: v0.910
     hooks:
       - id: mypy
         files: ^aiowatttime/.+\.py$

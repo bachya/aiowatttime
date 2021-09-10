@@ -6,26 +6,54 @@ import aiohttp
 import pytest
 
 from aiowatttime import Client
-from aiowatttime.errors import RequestError
+from aiowatttime.errors import InvalidCredentialsError, RequestError
 
 
 @pytest.mark.asyncio
-async def test_api_error(aresponses):
-    """Test the API returning a non-2xx HTTP code."""
+async def test_expired_token(
+    aresponses, forbidden_response, realtime_emissions_response, login_response
+):
+    """Test that an expired token is handled correctly."""
     aresponses.add(
         "api2.watttime.org",
         "/v2/login",
         "get",
         aresponses.Response(
-            text="Forbidden",
-            status=403,
+            text=json.dumps(login_response),
+            status=200,
             headers={"Content-Type": "application/json; charset=utf-8"},
+        ),
+    )
+    aresponses.add(
+        "api2.watttime.org",
+        "/v2/index",
+        "get",
+        aresponses.Response(
+            text=json.dumps(realtime_emissions_response),
+            status=200,
+            headers={"Content-Type": "application/json; charset=utf-8"},
+        ),
+    )
+    aresponses.add(
+        "api2.watttime.org",
+        "/v2/index",
+        "get",
+        aresponses.Response(
+            text=forbidden_response, status=403, headers={"Content-Type": "text/html"},
         ),
     )
 
     async with aiohttp.ClientSession() as session:
-        with pytest.raises(RequestError):
-            await Client.async_login("user", "password", session=session)
+        client = await Client.async_login("user", "password", session=session)
+
+        # Simulate request #1 having a working token:
+        await client.emissions.async_get_realtime_emissions("40.6971494", "-74.2598655")
+
+        # Simulate request #2 having an expired token:
+        with pytest.raises(InvalidCredentialsError):
+            await client.emissions.async_get_realtime_emissions(
+                "40.6971494", "-74.2598655"
+            )
 
 
 @pytest.mark.asyncio

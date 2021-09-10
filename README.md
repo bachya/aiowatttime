@@ -20,8 +20,6 @@
 
 `aiowatttime` is currently supported on:
 
-* Python 3.6
-* Python 3.7
 * Python 3.8
 * Python 3.9
 
@@ -87,12 +85,72 @@ asyncio.run(main())
 
 ## Programmatically Requesting a Password Reset
 
-To request that WattTime email you password reset instructions:
-
 ```python
 await client.async_request_password_reset()
 ```
 
+## Getting Emissions Data
+
+### Grid Region
+
+It may be useful to first get the "grid region" (i.e., geographical info) for the area
+you care about:
+
+```python
+await client.emissions.async_get_grid_region("<LATITUDE>", "<LONGITUDE>")
+# >>> { "id": 263, "abbrev": "PJM_NJ", "name": "PJM New Jersey" }
+```
+
+Getting emissions data will require either your latitude/longitude _or_ the "balancing
+authority abbreviation" (``PJM_NJ`` in the example above).
+
+### Realtime Data
+
+```python
+await client.emissions.async_get_realtime_emissions("<LATITUDE>", "<LONGITUDE>")
+# >>> { "freq": "300", "ba": "CAISO_NORTH", "percent": "53", "moer": "850.743982", ... }
+```
+
+### Forecasted Data
+
+```python
+await client.emissions.async_get_forecasted_emissions("<BA_ABBREVATION>")
+# >>> [ { "generated_at": "2021-08-05T09:05:00+00:00", "forecast": [...] } ]
+```
+
+You can also get the forecasted data using a specific start and end `datetime.datetime`:
+
+```python
+from datetime import datetime
+
+await client.emissions.async_get_forecasted_emissions(
+    "<BA_ABBREVATION>",
+    start_datetime=datetime(2021, 1, 1),
+    end_datetime=datetime(2021, 2, 1),
+)
+# >>> [ { "generated_at": "2021-08-05T09:05:00+00:00", "forecast": [...] } ]
+```
+
+### Historical Data
+
+```python
+await client.emissions.async_get_historical_emissions("<LATITUDE>", "<LONGITUDE>")
+# >>> [ { "point_time": "2019-02-21T00:15:00.000Z", "value": 844, ... } ]
+```
+
+You can also get the historical data using a specific start and end `datetime.datetime`:
+
+```python
+from datetime import datetime
+
+await client.emissions.async_get_historical_emissions(
+    "<LATITUDE>",
+    "<LONGITUDE>"
+    start_datetime=datetime(2021, 1, 1),
+    end_datetime=datetime(2021, 2, 1),
+)
+# >>> [ { "point_time": "2019-02-21T00:15:00.000Z", "value": 844, ... } ]
+```
 
 # Contributing
 
