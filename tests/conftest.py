@@ -6,6 +6,12 @@ import pytest
 from .common import load_fixture
 
 
+@pytest.fixture(name="coordinates_not_found_response", scope="session")
+def coordinates_not_found_response_fixture():
+    """Define a fixture to return a unknown coordinates response."""
+    return json.loads(load_fixture("coordinates_not_found_response.json"))
+
+
 @pytest.fixture(name="forbidden_response", scope="session")
 def forbidden_response_fixture():
     """Define a fixture to return an NGINX 403 Forbidden HTML document."""

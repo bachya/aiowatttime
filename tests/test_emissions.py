@@ -7,7 +7,40 @@ import aiohttp
 import pytest
 
 from aiowatttime import Client
-from aiowatttime.errors import InvalidScopeError
+from aiowatttime.errors import CoordinatesNotFoundError, InvalidScopeError
+
+
+@pytest.mark.asyncio
+async def test_coordinates_not_found(
+    aresponses, coordinates_not_found_response, login_response
+):
+    """Test that unknown coordinates are handled correctly."""
+    aresponses.add(
+        "api2.watttime.org",
+        "/v2/login",
+        "get",
+        aresponses.Response(
+            text=json.dumps(login_response),
+            status=200,
+            headers={"Content-Type": "application/json; charset=utf-8"},
+        ),
+    )
+    aresponses.add(
+        "api2.watttime.org",
+        "/v2/ba-from-loc",
+        "get",
+        aresponses.Response(
+            text=json.dumps(coordinates_not_found_response),
+            status=404,
+            headers={"Content-Type": "application/json; charset=utf-8"},
+        ),
+    )
+
+    async with aiohttp.ClientSession() as session:
+        client = await Client.async_login("user", "password", session=session)
+        with pytest.raises(CoordinatesNotFoundError) as err:
+            await client.emissions.async_get_grid_region("0", "0")
+        assert "Coordinates not found" in str(err)
 
 
 @pytest.mark.asyncio

@@ -10,6 +10,12 @@ class WattTimeError(Exception):
     pass
 
 
+class CoordinatesNotFoundError(WattTimeError):
+    """Define an error related to unknown latitude/longitude."""
+
+    pass
+
+
 class InvalidCredentialsError(WattTimeError):
     """Define an error related to invalid credentials."""
 
@@ -35,6 +41,7 @@ class UsernameTakenError(WattTimeError):
 
 
 ERROR_MESSAGE_TO_EXCEPTION_MAP = {
+    "Coordinates not found": CoordinatesNotFoundError,
     "Invalid scope": InvalidScopeError,
     "That username is taken": UsernameTakenError,
 }
