@@ -44,7 +44,7 @@ def raise_client_error(endpoint: str, data: dict[str, Any], err: Exception) -> N
     """Wrap an aiohttp.exceptions.ClientError in the correct exception type."""
     if "message" in data:
         msg = data["message"]
-    elif "error" in data:
+    else:
         msg = data["error"]
 
     try:
