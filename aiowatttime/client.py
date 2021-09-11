@@ -8,7 +8,7 @@ from aiohttp.client_exceptions import ClientError, ContentTypeError
 
 from .const import LOGGER
 from .emissions import EmissionsAPI
-from .errors import raise_error
+from .errors import InvalidCredentialsError, raise_client_error
 
 API_BASE_URL = "https://api2.watttime.org/v2"
 
@@ -107,9 +107,14 @@ class Client:
             async with session.request(method, url, **kwargs) as resp:
                 data = await resp.json()
                 resp.raise_for_status()
-        except (ClientError, ContentTypeError) as err:
+        except ContentTypeError as err:
+            # When the API runs into a credentials issue, it returns NGINX's default
+            # 403 Forbidden HTML, which is an aiohttp.client_exceptions.ContentTypeError
+            # (since we're expecting JSON back):
+            raise InvalidCredentialsError("Invalid credentials") from err
+        except ClientError as err:
             assert isinstance(data, dict)
-            raise_error(endpoint, data, err)
+            raise_client_error(endpoint, data, err)
         finally:
             if not use_running_session:
                 await session.close()

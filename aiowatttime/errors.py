@@ -3,8 +3,6 @@ from __future__ import annotations
 
 from typing import Any
 
-from aiohttp.client_exceptions import ContentTypeError
-
 
 class WattTimeError(Exception):
     """Define a base exception."""
@@ -42,14 +40,8 @@ ERROR_MESSAGE_TO_EXCEPTION_MAP = {
 }
 
 
-def raise_error(endpoint: str, data: dict[str, Any], err: Exception) -> None:
-    """Return a wrapped error that has the correct info."""
-    if isinstance(err, ContentTypeError):
-        # When the API runs into a credentials issue, it returns NGINX's default
-        # 403 Forbidden HTML, which is an aiohttp.client_exceptions.ContentTypeError
-        # (since we're expecting JSON back):
-        raise InvalidCredentialsError("Invalid credentials") from err
-
+def raise_client_error(endpoint: str, data: dict[str, Any], err: Exception) -> None:
+    """Wrap an aiohttp.exceptions.ClientError in the correct exception type."""
     if "message" in data:
         msg = data["message"]
     elif "error" in data:
