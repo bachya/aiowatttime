@@ -6,7 +6,7 @@ import aiohttp
 import pytest
 
 from aiowatttime import Client
-from aiowatttime.errors import InvalidCredentialsError, RequestError
+from aiowatttime.errors import InvalidCredentialsError, RequestError, UsernameTakenError
 
 
 @pytest.mark.asyncio
@@ -142,7 +142,7 @@ async def test_register_new_username_fail(aresponses, new_user_fail_response):
     )
 
     async with aiohttp.ClientSession() as session:
-        with pytest.raises(RequestError) as err:
+        with pytest.raises(UsernameTakenError) as err:
             await Client.async_register_new_username(
                 "user",
                 "password",
