@@ -1,6 +1,7 @@
 """Define an API client."""
 from __future__ import annotations
 
+import asyncio
 from typing import Any, TypedDict, cast
 
 from aiohttp import BasicAuth, ClientSession, ClientTimeout
@@ -12,6 +13,8 @@ from .errors import InvalidCredentialsError, raise_client_error
 
 API_BASE_URL = "https://api2.watttime.org/v2"
 
+DEFAULT_RETRIES = 3
+DEFAULT_RETRY_DELAY = 1
 DEFAULT_TIMEOUT = 10
 
 
@@ -31,12 +34,20 @@ class TokenResponseType(TypedDict):
 class Client:
     """Define the client."""
 
-    def __init__(self, *, session: ClientSession | None = None) -> None:
+    def __init__(
+        self,
+        *,
+        session: ClientSession | None = None,
+        request_retry_delay: int = DEFAULT_RETRY_DELAY,
+        request_retries: int = DEFAULT_RETRIES,
+    ) -> None:
         """Initialize.
 
         Note that this is not intended to be instantiated directly; instead, users
         should use the async_login and async_register_new_username class methods.
         """
+        self._request_retry_delay = request_retry_delay
+        self._request_retries = request_retries
         self._session = session
 
         # Intended to be populated by async_authenticate():
@@ -50,10 +61,20 @@ class Client:
 
     @classmethod
     async def async_login(
-        cls, username: str, password: str, *, session: ClientSession | None = None
+        cls,
+        username: str,
+        password: str,
+        *,
+        session: ClientSession | None = None,
+        request_retry_delay: int = DEFAULT_RETRY_DELAY,
+        request_retries: int = DEFAULT_RETRIES,
     ) -> "Client":
         """Get a fully initialized API client."""
-        client = cls(session=session)
+        client = cls(
+            session=session,
+            request_retry_delay=request_retry_delay,
+            request_retries=request_retries,
+        )
         client._username = username
         client._password = password
         await client.async_authenticate()
@@ -68,9 +89,15 @@ class Client:
         organization: str,
         *,
         session: ClientSession | None = None,
+        request_retry_delay: int = DEFAULT_RETRY_DELAY,
+        request_retries: int = DEFAULT_RETRIES,
     ) -> RegisterNewUserResponseType:
         """Get a fully initialized API client."""
-        client = cls(session=session)
+        client = cls(
+            session=session,
+            request_retry_delay=request_retry_delay,
+            request_retries=request_retries,
+        )
         data = await client._async_request(
             "post",
             "register",
@@ -102,22 +129,46 @@ class Client:
         assert session
 
         data: dict[str, Any] | list[dict[str, Any]] = {}
+        retry = 0
 
-        try:
+        while retry < self._request_retries:
             async with session.request(method, url, **kwargs) as resp:
-                data = await resp.json()
-                resp.raise_for_status()
-        except ContentTypeError as err:
-            # When the API runs into a credentials issue, it returns NGINX's default
-            # 403 Forbidden HTML, which is an aiohttp.client_exceptions.ContentTypeError
-            # (since we're expecting JSON back):
-            raise InvalidCredentialsError("Invalid credentials") from err
-        except ClientError as err:
-            assert isinstance(data, dict)
-            raise_client_error(endpoint, data, err)
-        finally:
-            if not use_running_session:
-                await session.close()
+                try:
+                    data = await resp.json()
+                except ContentTypeError:
+                    # A ContentTypeError is assumed to be a credentials issue (since the
+                    # API returns NGINX's default BasicAuth HTML upon 403):
+                    if endpoint == "login":
+                        # If we are seeing this error upon login, we assume the
+                        # username/password are bad:
+                        raise InvalidCredentialsError("Invalid credentials") from None
+
+                    # ...otherwise, we assume the token has expired, so we make a few
+                    # attempts to refresh it and retry the original request:
+                    retry += 1
+                    LOGGER.debug(
+                        "Token failed; re-authenticating and trying again (attempt %s of %s)",
+                        retry,
+                        self._request_retries,
+                    )
+                    await self.async_authenticate()
+                    await asyncio.sleep(self._request_retry_delay)
+                    continue
+
+                try:
+                    resp.raise_for_status()
+                except ClientError as err:
+                    assert isinstance(data, dict)
+                    raise_client_error(endpoint, data, err)
+
+                break
+        else:
+            # We only end up here if we continue to have credential issues after
+            # several retries:
+            raise InvalidCredentialsError("Invalid credentials") from None
+
+        if not use_running_session:
+            await session.close()
 
         LOGGER.debug("Received data for /%s: %s", endpoint, data)
 
@@ -125,13 +176,17 @@ class Client:
 
     async def async_authenticate(self) -> None:
         """Retrieve and store a new access token."""
+        # Invalidate the token first since we can't have it *and* BasicAuth credentials
+        # in the same request:
         self._token = None
+
         token_resp = cast(
             TokenResponseType,
             await self._async_request(
-                "get", "login", auth=BasicAuth(self._username, password=self._password)
+                "get", "login", auth=BasicAuth(self._username, password=self._password),
             ),
         )
+
         self._token = token_resp["token"]
 
     async def async_request_password_reset(self) -> None:
