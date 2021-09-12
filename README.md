@@ -154,16 +154,15 @@ await client.emissions.async_get_historical_emissions(
 
 ## Retry Logic
 
-By default, `aiowatttime` will handle expired token for you. By default, when the library
-encounters such a token, it will:
+By default, `aiowatttime` will handle expired access tokens for you. When a token expires,
+the library will:
 
 * Request a new token
 * Pause for 1 second (to be respectful of the API rate limiting)
 * Attempt the original request again
-* Perform the above sequence a total of 3 times
 
-Both the number of retries and the delay between retries can be configured when
-instantiating a client:
+By default, this sequence will be attempted 3 times. Both the number of retries and the
+delay between retries can be configured when instantiating a client:
 
 ```python
 import asyncio
@@ -188,6 +187,8 @@ async def main() -> None:
 
 asyncio.run(main())
 ```
+
+As always, an invalid username/password combination will immediately throw an exception.
 
 # Contributing
 
