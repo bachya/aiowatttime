@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import asyncio
+import logging
 from typing import Any, TypedDict, cast
 
 from aiohttp import BasicAuth, ClientSession, ClientTimeout
@@ -31,13 +32,14 @@ class TokenResponseType(TypedDict):
     token: str
 
 
-class Client:
+class Client:  # pylint: disable=too-many-instance-attributes
     """Define the client."""
 
     def __init__(
         self,
         *,
         session: ClientSession | None = None,
+        logger: logging.Logger = LOGGER,
         request_retry_delay: int = DEFAULT_RETRY_DELAY,
         request_retries: int = DEFAULT_RETRIES,
     ) -> None:
@@ -46,8 +48,9 @@ class Client:
         Note that this is not intended to be instantiated directly; instead, users
         should use the async_login and async_register_new_username class methods.
         """
-        self._request_retry_delay = request_retry_delay
+        self._logger = logger
         self._request_retries = request_retries
+        self._request_retry_delay = request_retry_delay
         self._session = session
 
         # Intended to be populated by async_authenticate():
@@ -66,12 +69,14 @@ class Client:
         password: str,
         *,
         session: ClientSession | None = None,
+        logger: logging.Logger = LOGGER,
         request_retry_delay: int = DEFAULT_RETRY_DELAY,
         request_retries: int = DEFAULT_RETRIES,
     ) -> "Client":
         """Get a fully initialized API client."""
         client = cls(
             session=session,
+            logger=logger,
             request_retry_delay=request_retry_delay,
             request_retries=request_retries,
         )
@@ -89,12 +94,14 @@ class Client:
         organization: str,
         *,
         session: ClientSession | None = None,
+        logger: logging.Logger = LOGGER,
         request_retry_delay: int = DEFAULT_RETRY_DELAY,
         request_retries: int = DEFAULT_RETRIES,
     ) -> RegisterNewUserResponseType:
         """Get a fully initialized API client."""
         client = cls(
             session=session,
+            logger=logger,
             request_retry_delay=request_retry_delay,
             request_retries=request_retries,
         )
@@ -146,7 +153,7 @@ class Client:
                     # ...otherwise, we assume the token has expired, so we make a few
                     # attempts to refresh it and retry the original request:
                     retry += 1
-                    LOGGER.debug(
+                    self._logger.debug(
                         "Token failed; re-authenticating and trying again (attempt %s of %s)",
                         retry,
                         self._request_retries,
@@ -170,7 +177,7 @@ class Client:
         if not use_running_session:
             await session.close()
 
-        LOGGER.debug("Received data for /%s: %s", endpoint, data)
+        self._logger.debug("Received data for /%s: %s", endpoint, data)
 
         return data
 

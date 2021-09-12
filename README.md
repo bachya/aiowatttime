@@ -190,6 +190,35 @@ asyncio.run(main())
 
 As always, an invalid username/password combination will immediately throw an exception.
 
+## Custom Logger
+
+By default, `aiowatttime` provides its own logger. If you should wish to use your own, you
+can pass it to the client during instantiation:
+
+```python
+import asyncio
+import logging
+
+from aiohttp import ClientSession
+
+from aiowatttime import Client
+
+CUSTOM_LOGGER = logging.getLogger("my_custom_logger")
+
+
+async def main() -> None:
+    async with ClientSession() as session:
+        client = await Client.async_login(
+            "user",
+            "password",
+            session=session,
+            logger=logger,
+        )
+
+
+asyncio.run(main())
+```
+
 # Contributing
 
 1. [Check for open features/bugs](https://github.com/bachya/aiowatttime/issues)
