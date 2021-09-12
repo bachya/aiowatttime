@@ -183,7 +183,7 @@ class Client:
         token_resp = cast(
             TokenResponseType,
             await self._async_request(
-                "get", "login", auth=BasicAuth(self._username, password=self._password),
+                "get", "login", auth=BasicAuth(self._username, password=self._password)
             ),
         )
 
