@@ -48,9 +48,9 @@ class RealTimeEmissionsResponseType(TypedDict):
 
     ba: str
     freq: str
-    moer: float
     percent: int
     point_time: str
+    moer: float | None
 
 
 class EmissionsAPI:
