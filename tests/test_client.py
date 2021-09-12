@@ -13,7 +13,7 @@ from aiowatttime.errors import InvalidCredentialsError, RequestError, UsernameTa
 async def test_expired_token(
     aresponses, forbidden_response, realtime_emissions_response, login_response
 ):
-    """Test that an expired token is handled correctly."""
+    """Test a scenario where multiple token refreshes don't work."""
     aresponses.add(
         "api2.watttime.org",
         "/v2/login",
@@ -42,9 +42,61 @@ async def test_expired_token(
             text=forbidden_response, status=403, headers={"Content-Type": "text/html"},
         ),
     )
+    aresponses.add(
+        "api2.watttime.org",
+        "/v2/login",
+        "get",
+        aresponses.Response(
+            text=json.dumps(login_response),
+            status=200,
+            headers={"Content-Type": "application/json; charset=utf-8"},
+        ),
+    )
+    aresponses.add(
+        "api2.watttime.org",
+        "/v2/index",
+        "get",
+        aresponses.Response(
+            text=forbidden_response, status=403, headers={"Content-Type": "text/html"},
+        ),
+    )
+    aresponses.add(
+        "api2.watttime.org",
+        "/v2/login",
+        "get",
+        aresponses.Response(
+            text=json.dumps(login_response),
+            status=200,
+            headers={"Content-Type": "application/json; charset=utf-8"},
+        ),
+    )
+    aresponses.add(
+        "api2.watttime.org",
+        "/v2/index",
+        "get",
+        aresponses.Response(
+            text=forbidden_response, status=403, headers={"Content-Type": "text/html"},
+        ),
+    )
+    aresponses.add(
+        "api2.watttime.org",
+        "/v2/login",
+        "get",
+        aresponses.Response(
+            text=json.dumps(login_response),
+            status=200,
+            headers={"Content-Type": "application/json; charset=utf-8"},
+        ),
+    )
 
     async with aiohttp.ClientSession() as session:
-        client = await Client.async_login("user", "password", session=session)
+        client = await Client.async_login(
+            "user",
+            "password",
+            session=session,
+            # We set a 0 delay so that this test is unnecessarily slowed down:
+            request_retry_delay=0,
+        )
 
         # Simulate request #1 having a working token:
         await client.emissions.async_get_realtime_emissions("40.6971494", "-74.2598655")
@@ -128,6 +180,26 @@ async def test_get_new_token(aresponses, login_response):
 
 
 @pytest.mark.asyncio
+async def test_invalid_credentials(aresponses, caplog, forbidden_response):
+    """Test that invalid credentials on login are dealt with immediately (no retry)."""
+    import logging
+
+    caplog.set_level(logging.DEBUG)
+    aresponses.add(
+        "api2.watttime.org",
+        "/v2/login",
+        "get",
+        aresponses.Response(
+            text=forbidden_response, status=403, headers={"Content-Type": "text/html"},
+        ),
+    )
+
+    async with aiohttp.ClientSession() as session:
+        with pytest.raises(InvalidCredentialsError):
+            await Client.async_login("user", "password", session=session)
+
+
+@pytest.mark.asyncio
 async def test_register_new_username_fail(aresponses, new_user_fail_response):
     """Test that a failed new user registration is handled correctly."""
     aresponses.add(
@@ -205,3 +277,60 @@ async def test_request_password_reset_fail(
         with pytest.raises(RequestError) as err:
             await client.async_request_password_reset()
         assert "A problem occurred, your request could not be processed" in str(err)
+
+
+@pytest.mark.asyncio
+async def test_successful_token_refresh(
+    aresponses, forbidden_response, realtime_emissions_response, login_response
+):
+    """Test that a refreshed token works correctly."""
+    aresponses.add(
+        "api2.watttime.org",
+        "/v2/login",
+        "get",
+        aresponses.Response(
+            text=json.dumps(login_response),
+            status=200,
+            headers={"Content-Type": "application/json; charset=utf-8"},
+        ),
+    )
+    aresponses.add(
+        "api2.watttime.org",
+        "/v2/index",
+        "get",
+        aresponses.Response(
+            text=forbidden_response, status=403, headers={"Content-Type": "text/html"},
+        ),
+    )
+    aresponses.add(
+        "api2.watttime.org",
+        "/v2/login",
+        "get",
+        aresponses.Response(
+            text=json.dumps(login_response),
+            status=200,
+            headers={"Content-Type": "application/json; charset=utf-8"},
+        ),
+    )
+    aresponses.add(
+        "api2.watttime.org",
+        "/v2/index",
+        "get",
+        aresponses.Response(
+            text=json.dumps(realtime_emissions_response),
+            status=200,
+            headers={"Content-Type": "application/json; charset=utf-8"},
+        ),
+    )
+
+    async with aiohttp.ClientSession() as session:
+        client = await Client.async_login(
+            "user",
+            "password",
+            session=session,
+            # We set a 0 delay so that this test is unnecessarily slowed down:
+            request_retry_delay=0,
+        )
+
+        # If we get past here without raising an exception, we know the refresh worked:
+        await client.emissions.async_get_realtime_emissions("40.6971494", "-74.2598655")
