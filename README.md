@@ -155,7 +155,7 @@ await client.emissions.async_get_historical_emissions(
 ## Retry Logic
 
 By default, `aiowatttime` will handle expired access tokens for you. When a token expires,
-the library will attempt 3 iterations:
+the library will attempt the following sequence 3 times:
 
 * Request a new token
 * Pause for 1 second (to be respectful of the API rate limiting)
