@@ -1,12 +1,40 @@
 """Define tests for the client."""
 # pylint: disable=protected-access
 import json
+import logging
 
 import aiohttp
 import pytest
 
 from aiowatttime import Client
 from aiowatttime.errors import InvalidCredentialsError, RequestError, UsernameTakenError
+
+
+@pytest.mark.asyncio
+async def test_custom_logger(aresponses, caplog, login_response):
+    """Test that a custom logger is used when provided to the client."""
+    caplog.set_level(logging.DEBUG)
+    custom_logger = logging.getLogger("custom")
+
+    aresponses.add(
+        "api2.watttime.org",
+        "/v2/login",
+        "get",
+        aresponses.Response(
+            text=json.dumps(login_response),
+            status=200,
+            headers={"Content-Type": "application/json; charset=utf-8"},
+        ),
+    )
+
+    async with aiohttp.ClientSession() as session:
+        await Client.async_login(
+            "user", "password", session=session, logger=custom_logger,
+        )
+        assert any(
+            record.name == "custom" and "Received data" in record.message
+            for record in caplog.records
+        )
 
 
 @pytest.mark.asyncio
