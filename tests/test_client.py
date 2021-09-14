@@ -262,7 +262,7 @@ async def test_successful_token_refresh(
         ),
     )
 
-    # Simulate getting a different token upon the next login
+    # Simulate getting a different token upon the next login:
     login_response["token"] = "efgh5678"
 
     aresponses.add(
