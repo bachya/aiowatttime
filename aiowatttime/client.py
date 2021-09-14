@@ -124,8 +124,6 @@ class Client:  # pylint: disable=too-many-instance-attributes
         url = f"{API_BASE_URL}/{endpoint}"
 
         kwargs.setdefault("headers", {})
-        if self._token:
-            kwargs["headers"]["Authorization"] = f"Bearer {self._token}"
 
         use_running_session = self._session and not self._session.closed
         if use_running_session:
@@ -139,6 +137,8 @@ class Client:  # pylint: disable=too-many-instance-attributes
         retry = 0
 
         while retry < self._request_retries:
+            if self._token:
+                kwargs["headers"]["Authorization"] = f"Bearer {self._token}"
             async with session.request(method, url, **kwargs) as resp:
                 try:
                     data = await resp.json()
