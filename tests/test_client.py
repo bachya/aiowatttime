@@ -1,6 +1,5 @@
 """Define tests for the client."""
 # pylint: disable=protected-access
-import json
 import logging
 
 import aiohttp
@@ -20,11 +19,7 @@ async def test_custom_logger(aresponses, caplog, login_response):
         "api2.watttime.org",
         "/v2/login",
         "get",
-        aresponses.Response(
-            text=json.dumps(login_response),
-            status=200,
-            headers={"Content-Type": "application/json; charset=utf-8"},
-        ),
+        response=aiohttp.web_response.json_response(login_response, status=200),
     )
 
     async with aiohttp.ClientSession() as session:
@@ -36,6 +31,8 @@ async def test_custom_logger(aresponses, caplog, login_response):
             for record in caplog.records
         )
 
+    aresponses.assert_plan_strictly_followed()
+
 
 @pytest.mark.asyncio
 async def test_expired_token(
@@ -46,27 +43,21 @@ async def test_expired_token(
         "api2.watttime.org",
         "/v2/login",
         "get",
-        aresponses.Response(
-            text=json.dumps(login_response),
-            status=200,
-            headers={"Content-Type": "application/json; charset=utf-8"},
+        response=aiohttp.web_response.json_response(login_response, status=200),
+    )
+    aresponses.add(
+        "api2.watttime.org",
+        "/v2/index",
+        "get",
+        response=aiohttp.web_response.json_response(
+            realtime_emissions_response, status=200
         ),
     )
     aresponses.add(
         "api2.watttime.org",
         "/v2/index",
         "get",
-        aresponses.Response(
-            text=json.dumps(realtime_emissions_response),
-            status=200,
-            headers={"Content-Type": "application/json; charset=utf-8"},
-        ),
-    )
-    aresponses.add(
-        "api2.watttime.org",
-        "/v2/index",
-        "get",
-        aresponses.Response(
+        response=aresponses.Response(
             text=forbidden_response, status=403, headers={"Content-Type": "text/html"},
         ),
     )
@@ -74,17 +65,13 @@ async def test_expired_token(
         "api2.watttime.org",
         "/v2/login",
         "get",
-        aresponses.Response(
-            text=json.dumps(login_response),
-            status=200,
-            headers={"Content-Type": "application/json; charset=utf-8"},
-        ),
+        response=aiohttp.web_response.json_response(login_response, status=200),
     )
     aresponses.add(
         "api2.watttime.org",
         "/v2/index",
         "get",
-        aresponses.Response(
+        response=aresponses.Response(
             text=forbidden_response, status=403, headers={"Content-Type": "text/html"},
         ),
     )
@@ -92,17 +79,13 @@ async def test_expired_token(
         "api2.watttime.org",
         "/v2/login",
         "get",
-        aresponses.Response(
-            text=json.dumps(login_response),
-            status=200,
-            headers={"Content-Type": "application/json; charset=utf-8"},
-        ),
+        response=aiohttp.web_response.json_response(login_response, status=200),
     )
     aresponses.add(
         "api2.watttime.org",
         "/v2/index",
         "get",
-        aresponses.Response(
+        response=aresponses.Response(
             text=forbidden_response, status=403, headers={"Content-Type": "text/html"},
         ),
     )
@@ -110,11 +93,7 @@ async def test_expired_token(
         "api2.watttime.org",
         "/v2/login",
         "get",
-        aresponses.Response(
-            text=json.dumps(login_response),
-            status=200,
-            headers={"Content-Type": "application/json; charset=utf-8"},
-        ),
+        response=aiohttp.web_response.json_response(login_response, status=200),
     )
 
     async with aiohttp.ClientSession() as session:
@@ -135,6 +114,8 @@ async def test_expired_token(
                 "40.6971494", "-74.2598655"
             )
 
+    aresponses.assert_plan_strictly_followed()
+
 
 @pytest.mark.asyncio
 async def test_get_client(aresponses, login_response):
@@ -143,16 +124,14 @@ async def test_get_client(aresponses, login_response):
         "api2.watttime.org",
         "/v2/login",
         "get",
-        aresponses.Response(
-            text=json.dumps(login_response),
-            status=200,
-            headers={"Content-Type": "application/json; charset=utf-8"},
-        ),
+        response=aiohttp.web_response.json_response(login_response, status=200),
     )
 
     async with aiohttp.ClientSession() as session:
         client = await Client.async_login("user", "password", session=session)
         assert client._token == "abcd1234"
+
+    aresponses.assert_plan_strictly_followed()
 
 
 @pytest.mark.asyncio
@@ -162,15 +141,12 @@ async def test_get_client_new_session(aresponses, login_response):
         "api2.watttime.org",
         "/v2/login",
         "get",
-        aresponses.Response(
-            text=json.dumps(login_response),
-            status=200,
-            headers={"Content-Type": "application/json; charset=utf-8"},
-        ),
+        response=aiohttp.web_response.json_response(login_response, status=200),
     )
 
     client = await Client.async_login("user", "password")
     assert client._token == "abcd1234"
+    aresponses.assert_plan_strictly_followed()
 
 
 @pytest.mark.asyncio
@@ -180,11 +156,7 @@ async def test_get_new_token(aresponses, login_response):
         "api2.watttime.org",
         "/v2/login",
         "get",
-        aresponses.Response(
-            text=json.dumps(login_response),
-            status=200,
-            headers={"Content-Type": "application/json; charset=utf-8"},
-        ),
+        response=aiohttp.web_response.json_response(login_response, status=200),
     )
 
     login_response = {"token": "efgh5678"}
@@ -193,11 +165,7 @@ async def test_get_new_token(aresponses, login_response):
         "api2.watttime.org",
         "/v2/login",
         "get",
-        aresponses.Response(
-            text=json.dumps(login_response),
-            status=200,
-            headers={"Content-Type": "application/json; charset=utf-8"},
-        ),
+        response=aiohttp.web_response.json_response(login_response, status=200),
     )
 
     async with aiohttp.ClientSession() as session:
@@ -206,18 +174,17 @@ async def test_get_new_token(aresponses, login_response):
         await client.async_authenticate()
         assert client._token == "efgh5678"
 
+    aresponses.assert_plan_strictly_followed()
+
 
 @pytest.mark.asyncio
-async def test_invalid_credentials(aresponses, caplog, forbidden_response):
+async def test_invalid_credentials(aresponses, forbidden_response):
     """Test that invalid credentials on login are dealt with immediately (no retry)."""
-    import logging
-
-    caplog.set_level(logging.DEBUG)
     aresponses.add(
         "api2.watttime.org",
         "/v2/login",
         "get",
-        aresponses.Response(
+        response=aresponses.Response(
             text=forbidden_response, status=403, headers={"Content-Type": "text/html"},
         ),
     )
@@ -225,6 +192,8 @@ async def test_invalid_credentials(aresponses, caplog, forbidden_response):
     async with aiohttp.ClientSession() as session:
         with pytest.raises(InvalidCredentialsError):
             await Client.async_login("user", "password", session=session)
+
+    aresponses.assert_plan_strictly_followed()
 
 
 @pytest.mark.asyncio
@@ -234,11 +203,7 @@ async def test_register_new_username_fail(aresponses, new_user_fail_response):
         "api2.watttime.org",
         "/v2/register",
         "post",
-        aresponses.Response(
-            text=json.dumps(new_user_fail_response),
-            status=400,
-            headers={"Content-Type": "application/json; charset=utf-8"},
-        ),
+        response=aiohttp.web_response.json_response(new_user_fail_response, status=400),
     )
 
     async with aiohttp.ClientSession() as session:
@@ -252,6 +217,8 @@ async def test_register_new_username_fail(aresponses, new_user_fail_response):
             )
         assert "That username is taken. Please choose another." in str(err)
 
+    aresponses.assert_plan_strictly_followed()
+
 
 @pytest.mark.asyncio
 async def test_register_new_username_success(aresponses, new_user_success_response):
@@ -260,10 +227,8 @@ async def test_register_new_username_success(aresponses, new_user_success_respon
         "api2.watttime.org",
         "/v2/register",
         "post",
-        aresponses.Response(
-            text=json.dumps(new_user_success_response),
-            status=200,
-            headers={"Content-Type": "application/json; charset=utf-8"},
+        response=aiohttp.web_response.json_response(
+            new_user_success_response, status=200
         ),
     )
 
@@ -272,6 +237,8 @@ async def test_register_new_username_success(aresponses, new_user_success_respon
             "user", "password", "email@email.com", "My Organization", session=session
         )
         assert resp == {"user": "user", "ok": "User created"}
+
+    aresponses.assert_plan_strictly_followed()
 
 
 @pytest.mark.asyncio
@@ -283,20 +250,14 @@ async def test_request_password_reset_fail(
         "api2.watttime.org",
         "/v2/login",
         "get",
-        aresponses.Response(
-            text=json.dumps(login_response),
-            status=200,
-            headers={"Content-Type": "application/json; charset=utf-8"},
-        ),
+        response=aiohttp.web_response.json_response(login_response, status=200),
     )
     aresponses.add(
         "api2.watttime.org",
         "/v2/password",
         "get",
-        aresponses.Response(
-            text=json.dumps(password_reset_fail_response),
-            status=400,
-            headers={"Content-Type": "application/json; charset=utf-8"},
+        response=aiohttp.web_response.json_response(
+            password_reset_fail_response, status=400
         ),
     )
 
@@ -305,6 +266,8 @@ async def test_request_password_reset_fail(
         with pytest.raises(RequestError) as err:
             await client.async_request_password_reset()
         assert "A problem occurred, your request could not be processed" in str(err)
+
+    aresponses.assert_plan_strictly_followed()
 
 
 @pytest.mark.asyncio
@@ -316,11 +279,7 @@ async def test_successful_token_refresh(
         "api2.watttime.org",
         "/v2/login",
         "get",
-        aresponses.Response(
-            text=json.dumps(login_response),
-            status=200,
-            headers={"Content-Type": "application/json; charset=utf-8"},
-        ),
+        response=aiohttp.web_response.json_response(login_response, status=200),
     )
     aresponses.add(
         "api2.watttime.org",
@@ -334,20 +293,14 @@ async def test_successful_token_refresh(
         "api2.watttime.org",
         "/v2/login",
         "get",
-        aresponses.Response(
-            text=json.dumps(login_response),
-            status=200,
-            headers={"Content-Type": "application/json; charset=utf-8"},
-        ),
+        response=aiohttp.web_response.json_response(login_response, status=200),
     )
     aresponses.add(
         "api2.watttime.org",
         "/v2/index",
         "get",
-        aresponses.Response(
-            text=json.dumps(realtime_emissions_response),
-            status=200,
-            headers={"Content-Type": "application/json; charset=utf-8"},
+        response=aiohttp.web_response.json_response(
+            realtime_emissions_response, status=200
         ),
     )
 
@@ -362,3 +315,5 @@ async def test_successful_token_refresh(
 
         # If we get past here without raising an exception, we know the refresh worked:
         await client.emissions.async_get_realtime_emissions("40.6971494", "-74.2598655")
+
+    aresponses.assert_plan_strictly_followed()

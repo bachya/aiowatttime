@@ -1,7 +1,6 @@
 """Define tests for the emissions API endpoints."""
 # pylint: disable=protected-access
 from datetime import datetime
-import json
 
 import aiohttp
 import pytest
@@ -19,20 +18,14 @@ async def test_coordinates_not_found(
         "api2.watttime.org",
         "/v2/login",
         "get",
-        aresponses.Response(
-            text=json.dumps(login_response),
-            status=200,
-            headers={"Content-Type": "application/json; charset=utf-8"},
-        ),
+        response=aiohttp.web_response.json_response(login_response, status=200),
     )
     aresponses.add(
         "api2.watttime.org",
         "/v2/ba-from-loc",
         "get",
-        aresponses.Response(
-            text=json.dumps(coordinates_not_found_response),
-            status=404,
-            headers={"Content-Type": "application/json; charset=utf-8"},
+        response=aiohttp.web_response.json_response(
+            coordinates_not_found_response, status=404
         ),
     )
 
@@ -50,21 +43,13 @@ async def test_get_grid_region(aresponses, grid_region_response, login_response)
         "api2.watttime.org",
         "/v2/login",
         "get",
-        aresponses.Response(
-            text=json.dumps(login_response),
-            status=200,
-            headers={"Content-Type": "application/json; charset=utf-8"},
-        ),
+        response=aiohttp.web_response.json_response(login_response, status=200),
     )
     aresponses.add(
         "api2.watttime.org",
         "/v2/ba-from-loc",
         "get",
-        aresponses.Response(
-            text=json.dumps(grid_region_response),
-            status=200,
-            headers={"Content-Type": "application/json; charset=utf-8"},
-        ),
+        response=aiohttp.web_response.json_response(grid_region_response, status=200),
     )
 
     async with aiohttp.ClientSession() as session:
@@ -84,20 +69,14 @@ async def test_get_forecasted_emissions(
         "api2.watttime.org",
         "/v2/login",
         "get",
-        aresponses.Response(
-            text=json.dumps(login_response),
-            status=200,
-            headers={"Content-Type": "application/json; charset=utf-8"},
-        ),
+        response=aiohttp.web_response.json_response(login_response, status=200),
     )
     aresponses.add(
         "api2.watttime.org",
         "/v2/forecast",
         "get",
-        aresponses.Response(
-            text=json.dumps(forecasted_emissions_response),
-            status=200,
-            headers={"Content-Type": "application/json; charset=utf-8"},
+        response=aiohttp.web_response.json_response(
+            forecasted_emissions_response, status=200
         ),
     )
 
@@ -127,20 +106,14 @@ async def test_get_historical_emissions(
         "api2.watttime.org",
         "/v2/login",
         "get",
-        aresponses.Response(
-            text=json.dumps(login_response),
-            status=200,
-            headers={"Content-Type": "application/json; charset=utf-8"},
-        ),
+        response=aiohttp.web_response.json_response(login_response, status=200),
     )
     aresponses.add(
         "api2.watttime.org",
         "/v2/data",
         "get",
-        aresponses.Response(
-            text=json.dumps(historical_emissions_response),
-            status=200,
-            headers={"Content-Type": "application/json; charset=utf-8"},
+        response=aiohttp.web_response.json_response(
+            historical_emissions_response, status=200
         ),
     )
 
@@ -171,20 +144,14 @@ async def test_get_realtime_emissions(
         "api2.watttime.org",
         "/v2/login",
         "get",
-        aresponses.Response(
-            text=json.dumps(login_response),
-            status=200,
-            headers={"Content-Type": "application/json; charset=utf-8"},
-        ),
+        response=aiohttp.web_response.json_response(login_response, status=200),
     )
     aresponses.add(
         "api2.watttime.org",
         "/v2/index",
         "get",
-        aresponses.Response(
-            text=json.dumps(realtime_emissions_response),
-            status=200,
-            headers={"Content-Type": "application/json; charset=utf-8"},
+        response=aiohttp.web_response.json_response(
+            realtime_emissions_response, status=200
         ),
     )
 
@@ -203,21 +170,13 @@ async def test_invalid_scope(aresponses, invalid_scope_response, login_response)
         "api2.watttime.org",
         "/v2/login",
         "get",
-        aresponses.Response(
-            text=json.dumps(login_response),
-            status=200,
-            headers={"Content-Type": "application/json; charset=utf-8"},
-        ),
+        response=aiohttp.web_response.json_response(login_response, status=200),
     )
     aresponses.add(
         "api2.watttime.org",
         "/v2/forecast",
         "get",
-        aresponses.Response(
-            text=json.dumps(invalid_scope_response),
-            status=403,
-            headers={"Content-Type": "application/json; charset=utf-8"},
-        ),
+        response=aiohttp.web_response.json_response(invalid_scope_response, status=403),
     )
 
     async with aiohttp.ClientSession() as session:
