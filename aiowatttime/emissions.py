@@ -59,7 +59,7 @@ def ensure_start_and_end_datetime():
     def decorator(func: Awaitable):
         """Decorate."""
 
-        def wrapper(*args, start_datetime=None, end_datetime=None, **kwargs):
+        async def wrapper(*args, start_datetime=None, end_datetime=None, **kwargs):
             """Wrap."""
             if ~(bool(start_datetime) ^ bool(end_datetime)) == -1:
                 # This is a form of XNOR that handles None-type values; if the user
