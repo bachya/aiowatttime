@@ -77,9 +77,6 @@ class EmissionsAPI:
         end_datetime: datetime | None = None,
     ) -> RealTimeEmissionsResponseType:
         """Return the forecasted emissions for a latitude/longitude."""
-        if start_datetime and not end_datetime or end_datetime and not start_datetime:
-            raise ValueError("You must provided start and end datetimes together")
-
         params = {"ba": balancing_authority_abbreviation}
         if start_datetime and end_datetime:
             params["starttime"] = start_datetime.isoformat()
@@ -98,9 +95,6 @@ class EmissionsAPI:
         moer_version: str = DEFAULT_MOER_VERSION,
     ) -> HistoricalEmissionsResponseType:
         """Return the historical emissions for a latitude/longitude."""
-        if start_datetime and not end_datetime or end_datetime and not start_datetime:
-            raise ValueError("You must provided start and end datetimes together")
-
         params = {"latitude": latitude, "longitude": longitude, "version": moer_version}
         if start_datetime and end_datetime:
             params["starttime"] = start_datetime.isoformat()
