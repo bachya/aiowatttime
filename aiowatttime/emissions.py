@@ -64,12 +64,7 @@ def ensure_start_and_end_datetime():
             if ~(bool(start_datetime) ^ bool(end_datetime)) == -1:
                 # This is a form of XNOR that handles None-type values; if the user
                 # provides none or both of start_datetime and end_datetime, we're good:
-                return await func(
-                    *args,
-                    start_datetime=start_datetime,
-                    end_datetime=end_datetime,
-                    **kwargs
-                )
+                return await func(*args, **kwargs)
 
             # ...otherwise, raise an error:
             raise ValueError("start_datetime and end_datetime must go together")
