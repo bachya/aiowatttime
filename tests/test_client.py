@@ -293,8 +293,7 @@ async def test_successful_token_refresh(
         await client.emissions.async_get_realtime_emissions("40.6971494", "-74.2598655")
 
     # Verify that the token actually changed between retries of /v2/index:
-    first_token = aresponses.history[1].request.headers["Authorization"]
-    second_token = aresponses.history[3].request.headers["Authorization"]
-    assert first_token != second_token
+    assert aresponses.history[1].request.headers["Authorization"] == "Bearer abcd1234"
+    assert aresponses.history[3].request.headers["Authorization"] == "Bearer efgh5678"
 
     aresponses.assert_plan_strictly_followed()
