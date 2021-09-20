@@ -62,7 +62,7 @@ def ensure_start_and_end_datetime():
         def wrapper(*args, start_datetime=None, end_datetime=None, **kwargs):
             """Wrap."""
             if ~(bool(start_datetime) ^ bool(end_datetime)) == -1:
-                # This is a form of XNOR that "handles" None-type values - if the user
+                # This is a form of XNOR that handles None-type values; if the user
                 # provides none or both of start_datetime and end_datetime, we're good:
                 return await func(
                     *args,
