@@ -53,6 +53,27 @@ class RealTimeEmissionsResponseType(TypedDict):
     moer: float | None
 
 
+def ensure_start_and_end_datetime():
+    """Ensure that both start and end datetime arguments exist in a function call."""
+
+    def decorator(func: Awaitable):
+        """Decorate."""
+
+        def wrapper(*args, start_datetime=None, end_datetime=None, **kwargs):
+            """Wrap."""
+            if ~(bool(start_datetime) ^ bool(end_datetime)) == -1:
+                # This is a form of XNOR that "handles" None-type values - if the user
+                # provides none or both of start_datetime and end_datetime, we're good:
+                return await func(
+                    *args,
+                    start_datetime=start_datetime,
+                    end_datetime=end_datetime,
+                    **kwargs
+                )
+
+            # ...otherwise, raise an error:
+            raise ValueError("start_datetime and end_datetime must go together")
+
 class EmissionsAPI:
     """Define the manager object."""
 
@@ -69,6 +90,7 @@ class EmissionsAPI:
         )
         return cast(GridRegionResponseType, data)
 
+    ensure_start_and_end_datetime()
     async def async_get_forecasted_emissions(
         self,
         balancing_authority_abbreviation: str,
@@ -77,17 +99,15 @@ class EmissionsAPI:
         end_datetime: datetime | None = None,
     ) -> RealTimeEmissionsResponseType:
         """Return the forecasted emissions for a latitude/longitude."""
-        if start_datetime and not end_datetime or end_datetime and not start_datetime:
-            raise ValueError("You must provided start and end datetimes together")
-
         params = {"ba": balancing_authority_abbreviation}
-        if start_datetime and end_datetime:
+        if start_datetime:
             params["starttime"] = start_datetime.isoformat()
             params["endtime"] = end_datetime.isoformat()
 
         data = await self._async_request("get", "forecast", params=params)
         return cast(RealTimeEmissionsResponseType, data)
 
+    ensure_start_and_end_datetime()
     async def async_get_historical_emissions(
         self,
         latitude: str,
@@ -98,11 +118,8 @@ class EmissionsAPI:
         moer_version: str = DEFAULT_MOER_VERSION,
     ) -> HistoricalEmissionsResponseType:
         """Return the historical emissions for a latitude/longitude."""
-        if start_datetime and not end_datetime or end_datetime and not start_datetime:
-            raise ValueError("You must provided start and end datetimes together")
-
         params = {"latitude": latitude, "longitude": longitude, "version": moer_version}
-        if start_datetime and end_datetime:
+        if start_datetime:
             params["starttime"] = start_datetime.isoformat()
             params["endtime"] = end_datetime.isoformat()
 
