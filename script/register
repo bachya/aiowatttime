@@ -20,7 +20,7 @@ async def main() -> None:
         )
     except RequestError as err:
         print(str(err))
-        sys.exit(0)
+        sys.exit(1)
     except KeyboardInterrupt:
         sys.exit(0)
 
