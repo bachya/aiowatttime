@@ -24,7 +24,10 @@ async def test_custom_logger(aresponses, caplog, login_response):
 
     async with aiohttp.ClientSession() as session:
         await Client.async_login(
-            "user", "password", session=session, logger=custom_logger,
+            "user",
+            "password",
+            session=session,
+            logger=custom_logger,
         )
         assert any(
             record.name == "custom" and "Received data" in record.message
@@ -58,7 +61,9 @@ async def test_expired_token(
         "/v2/index",
         "get",
         response=aresponses.Response(
-            text=forbidden_response, status=403, headers={"Content-Type": "text/html"},
+            text=forbidden_response,
+            status=403,
+            headers={"Content-Type": "text/html"},
         ),
     )
     aresponses.add(
@@ -72,7 +77,9 @@ async def test_expired_token(
         "/v2/index",
         "get",
         response=aresponses.Response(
-            text=forbidden_response, status=403, headers={"Content-Type": "text/html"},
+            text=forbidden_response,
+            status=403,
+            headers={"Content-Type": "text/html"},
         ),
     )
     aresponses.add(
@@ -86,7 +93,9 @@ async def test_expired_token(
         "/v2/index",
         "get",
         response=aresponses.Response(
-            text=forbidden_response, status=403, headers={"Content-Type": "text/html"},
+            text=forbidden_response,
+            status=403,
+            headers={"Content-Type": "text/html"},
         ),
     )
     aresponses.add(
@@ -157,7 +166,9 @@ async def test_invalid_credentials(aresponses, forbidden_response):
         "/v2/login",
         "get",
         response=aresponses.Response(
-            text=forbidden_response, status=403, headers={"Content-Type": "text/html"},
+            text=forbidden_response,
+            status=403,
+            headers={"Content-Type": "text/html"},
         ),
     )
 
@@ -258,7 +269,9 @@ async def test_successful_token_refresh(
         "/v2/index",
         "get",
         aresponses.Response(
-            text=forbidden_response, status=403, headers={"Content-Type": "text/html"},
+            text=forbidden_response,
+            status=403,
+            headers={"Content-Type": "text/html"},
         ),
     )
 
