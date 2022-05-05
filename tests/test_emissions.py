@@ -86,7 +86,8 @@ async def test_get_forecasted_emissions(
         with pytest.raises(ValueError):
             # Test having only one datetime kwarg:
             forecast_data = await client.emissions.async_get_forecasted_emissions(
-                "NYISO_NYC", start_datetime=datetime(2021, 1, 1),
+                "NYISO_NYC",
+                start_datetime=datetime(2021, 1, 1),
             )
 
         forecast_data = await client.emissions.async_get_forecasted_emissions(
@@ -123,7 +124,9 @@ async def test_get_historical_emissions(
         with pytest.raises(ValueError):
             # Test having only one datetime kwarg:
             historical_data = await client.emissions.async_get_historical_emissions(
-                "40.6971494", "-74.2598655", start_datetime=datetime(2021, 1, 1),
+                "40.6971494",
+                "-74.2598655",
+                start_datetime=datetime(2021, 1, 1),
             )
 
         historical_data = await client.emissions.async_get_historical_emissions(
