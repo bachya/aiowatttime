@@ -25,7 +25,7 @@ def coverage(session: nox.sessions.Session) -> None:
     """Report test coverage."""
     args = session.posargs or [
         "-s",
-        "--cov=aionotion",
+        "--cov=aiowatttime",
         "--cov-report=term-missing",
         "--cov-report=xml",
         "tests/",
