@@ -154,7 +154,7 @@ class Client:  # pylint: disable=too-many-instance-attributes
                     # attempts to refresh it and retry the original request:
                     retry += 1
                     self._logger.debug(
-                        "Token failed; re-authenticating and trying again (attempt %s of %s)",
+                        "Token failed; trying again (attempt %s of %s)",
                         retry,
                         self._request_retries,
                     )
