@@ -8,6 +8,8 @@
 [![Maintainability](https://api.codeclimate.com/v1/badges/781e64940b1302ae9ac3/maintainability)](https://codeclimate.com/github/bachya/aiowatttime/maintainability)
 [![Say Thanks](https://img.shields.io/badge/SayThanks-!-1EAEDB.svg)](https://saythanks.io/to/bachya)
 
+<a href="https://www.buymeacoffee.com/bachya1208P" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
+
 `aiowatttime` is a Python 3, asyncio-friendly library for interacting with
 [WattTime](https://www.watttime.org) emissions data.
 
