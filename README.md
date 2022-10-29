@@ -22,13 +22,13 @@
 
 `aiowatttime` is currently supported on:
 
-* Python 3.9
-* Python 3.10
-* Python 3.11
+- Python 3.9
+- Python 3.10
+- Python 3.11
 
 # Installation
 
-```python
+```bash
 pip install aiowatttime
 ```
 
@@ -105,7 +105,7 @@ await client.emissions.async_get_grid_region("<LATITUDE>", "<LONGITUDE>")
 ```
 
 Getting emissions data will require either your latitude/longitude _or_ the "balancing
-authority abbreviation" (``PJM_NJ`` in the example above).
+authority abbreviation" (`PJM_NJ` in the example above).
 
 ### Realtime Data
 
@@ -148,7 +148,7 @@ from datetime import datetime
 
 await client.emissions.async_get_historical_emissions(
     "<LATITUDE>",
-    "<LONGITUDE>"
+    "<LONGITUDE>",
     start_datetime=datetime(2021, 1, 1),
     end_datetime=datetime(2021, 2, 1),
 )
@@ -160,9 +160,9 @@ await client.emissions.async_get_historical_emissions(
 By default, `aiowatttime` will handle expired access tokens for you. When a token expires,
 the library will attempt the following sequence 3 times:
 
-* Request a new token
-* Pause for 1 second (to be respectful of the API rate limiting)
-* Execute the original request again
+- Request a new token
+- Pause for 1 second (to be respectful of the API rate limiting)
+- Execute the original request again
 
 Both the number of retries and the delay between retries can be configured when
 instantiating a client:
@@ -225,14 +225,14 @@ asyncio.run(main())
 # Contributing
 
 1. [Check for open features/bugs](https://github.com/bachya/aiowatttime/issues)
-  or [initiate a discussion on one](https://github.com/bachya/aiowatttime/issues/new).
+   or [initiate a discussion on one](https://github.com/bachya/aiowatttime/issues/new).
 2. [Fork the repository](https://github.com/bachya/aiowatttime/fork).
 3. (_optional, but highly recommended_) Create a virtual environment: `python3 -m venv .venv`
 4. (_optional, but highly recommended_) Enter the virtual environment: `source ./venv/bin/activate`
 5. Install the dev environment: `script/setup`
 6. Code your new feature or bug fix.
 7. Write tests that cover your new functionality.
-8. Run tests and ensure 100% code coverage: `nox -rs coverage`
+8. Run tests and ensure 100% code coverage: `poetry run pytest --cov aiowatttime tests`
 9. Update `README.md` with any new documentation.
 10. Add yourself to `AUTHORS.md`.
 11. Submit a pull request!

@@ -10,7 +10,7 @@ from aiowatttime.errors import WattTimeError
 _LOGGER = logging.getLogger()
 
 USERNAME = "<USERNAME>"
-PASSWORD = "<PASSWORD>"
+PASSWORD = "<PASSWORD>"  # noqa: S105
 
 LATITUDE = "<LATITUDE>"
 LONGITUDE = "<LONGITUDE>"
