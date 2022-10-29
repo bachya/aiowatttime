@@ -8,7 +8,7 @@ from aiowatttime.errors import RequestError
 
 
 async def main() -> None:
-    """Run!"""
+    """Run."""
     try:
         username = input("What is your desired username? ")
         password = input("What is your desired password? ")

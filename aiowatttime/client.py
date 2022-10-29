@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Any, TypedDict, cast
+from typing import Any, cast
 
 from aiohttp import BasicAuth, ClientSession, ClientTimeout
 from aiohttp.client_exceptions import ClientError, ContentTypeError
@@ -19,34 +19,27 @@ DEFAULT_RETRY_DELAY = 1
 DEFAULT_TIMEOUT = 10
 
 
-class RegisterNewUserResponseType(TypedDict):
-    """Define a type for a response to async_register_new_username."""
-
-    ok: str
-    user: str
-
-
-class TokenResponseType(TypedDict):
-    """Define a type for a response to async_authenticate."""
-
-    token: str
-
-
-class Client:  # pylint: disable=too-many-instance-attributes
+class Client:
     """Define the client."""
 
     def __init__(
         self,
         *,
-        session: ClientSession | None = None,
         logger: logging.Logger = LOGGER,
         request_retry_delay: int = DEFAULT_RETRY_DELAY,
         request_retries: int = DEFAULT_RETRIES,
+        session: ClientSession | None = None,
     ) -> None:
         """Initialize.
 
         Note that this is not intended to be instantiated directly; instead, users
         should use the async_login and async_register_new_username class methods.
+
+        Args:
+            logger: A logger to use throughout the library.
+            request_retries: The number of times a failed request should be retried.
+            request_retry_delay: The delay (in seconds) between retries.
+            session: An option aiohttp ClientSession.
         """
         self._logger = logger
         self._request_retries = request_retries
@@ -68,12 +61,24 @@ class Client:  # pylint: disable=too-many-instance-attributes
         username: str,
         password: str,
         *,
-        session: ClientSession | None = None,
         logger: logging.Logger = LOGGER,
-        request_retry_delay: int = DEFAULT_RETRY_DELAY,
         request_retries: int = DEFAULT_RETRIES,
+        request_retry_delay: int = DEFAULT_RETRY_DELAY,
+        session: ClientSession | None = None,
     ) -> "Client":
-        """Get a fully initialized API client."""
+        """Get a fully initialized API client.
+
+        Args:
+            username: A WattTime account username.
+            password: A WattTime account password.
+            logger: A logger to use throughout the library.
+            request_retries: The number of times a failed request should be retried.
+            request_retry_delay: The delay (in seconds) between retries.
+            session: An option aiohttp ClientSession.
+
+        Returns:
+            An authenticated Client object.
+        """
         client = cls(
             session=session,
             logger=logger,
@@ -93,12 +98,26 @@ class Client:  # pylint: disable=too-many-instance-attributes
         email: str,
         organization: str,
         *,
-        session: ClientSession | None = None,
         logger: logging.Logger = LOGGER,
-        request_retry_delay: int = DEFAULT_RETRY_DELAY,
         request_retries: int = DEFAULT_RETRIES,
-    ) -> RegisterNewUserResponseType:
-        """Get a fully initialized API client."""
+        request_retry_delay: int = DEFAULT_RETRY_DELAY,
+        session: ClientSession | None = None,
+    ) -> dict[str, Any]:
+        """Get a fully initialized API client.
+
+        Args:
+            username: A username to use for a new WattTime account.
+            password: A password to use for a new WattTime account.
+            email: A email address to use for a new WattTime account.
+            organization: An organization name to use for a new WattTime account.
+            logger: A logger to use throughout the library.
+            request_retries: The number of times a failed request should be retried.
+            request_retry_delay: The delay (in seconds) between retries.
+            session: An option aiohttp ClientSession.
+
+        Returns:
+            An API response payload.
+        """
         client = cls(
             session=session,
             logger=logger,
@@ -115,23 +134,32 @@ class Client:  # pylint: disable=too-many-instance-attributes
                 "org": organization,
             },
         )
-        return cast(RegisterNewUserResponseType, data)
+        return cast(dict[str, Any], data)
 
     async def _async_request(
         self, method: str, endpoint: str, **kwargs: dict[str, Any]
     ) -> dict[str, Any] | list[dict[str, Any]]:
-        """Make an API request."""
+        """Make an API request.
+
+        Args:
+            method: An HTTP method.
+            endpoint: The API endpoint to query.
+            **kwargs: Additional kwargs to send with the request.
+
+        Returns:
+            An API response payload.
+
+        Raises:
+            InvalidCredentialsError: Raised upon invalid WattTime credentials.
+        """
         url = f"{API_BASE_URL}/{endpoint}"
 
         kwargs.setdefault("headers", {})
 
-        use_running_session = self._session and not self._session.closed
-        if use_running_session:
+        if use_running_session := self._session and not self._session.closed:
             session = self._session
         else:
             session = ClientSession(timeout=ClientTimeout(total=DEFAULT_TIMEOUT))
-
-        assert session
 
         data: dict[str, Any] | list[dict[str, Any]] = {}
         retry = 0
@@ -165,8 +193,9 @@ class Client:  # pylint: disable=too-many-instance-attributes
                 try:
                     resp.raise_for_status()
                 except ClientError as err:
-                    assert isinstance(data, dict)
-                    raise_client_error(endpoint, data, err)
+                    # We always expect a dict when this type of error occurs, but since
+                    # it's possible to get a list response, we cast the data:
+                    raise_client_error(endpoint, cast(dict[str, Any], data), err)
 
                 break
         else:
@@ -183,18 +212,23 @@ class Client:  # pylint: disable=too-many-instance-attributes
 
     async def async_authenticate(self) -> None:
         """Retrieve and store a new access token."""
-        # Invalidate the token first since we can't have it *and* BasicAuth credentials
-        # in the same request:
-        self._token = None
+        if self._username and self._password:
+            # Invalidate the token first since we can't have it *and* BasicAuth
+            # credentials in the same request:
+            self._token = None
 
-        token_resp = cast(
-            TokenResponseType,
-            await self._async_request(
-                "get", "login", auth=BasicAuth(self._username, password=self._password)
-            ),
-        )
+            token_resp = cast(
+                dict[str, Any],
+                await self._async_request(
+                    "get",
+                    "login",
+                    auth=BasicAuth(  # type: ignore[arg-type]
+                        self._username, password=self._password
+                    ),
+                ),
+            )
 
-        self._token = token_resp["token"]
+            self._token = token_resp["token"]
 
     async def async_request_password_reset(self) -> None:
         """Ask the API to send a password reset email."""

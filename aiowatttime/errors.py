@@ -48,11 +48,17 @@ ERROR_MESSAGE_TO_EXCEPTION_MAP = {
 
 
 def raise_client_error(endpoint: str, data: dict[str, Any], err: Exception) -> None:
-    """Wrap an aiohttp.exceptions.ClientError in the correct exception type."""
-    if "message" in data:
-        msg = data["message"]
-    else:
-        msg = data["error"]
+    """Wrap an aiohttp.exceptions.ClientError in the correct exception type.
+
+    Args:
+        endpoint: The API endpoint being queried.
+        data: An API response payload.
+        err: The source exception.
+
+    Raises:
+        exception: A subclass of WattTimeError.
+    """
+    msg = data.get("message", data["error"])
 
     try:
         [exception] = [v for k, v in ERROR_MESSAGE_TO_EXCEPTION_MAP.items() if k in msg]

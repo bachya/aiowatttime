@@ -1,73 +1,40 @@
 """Define an API endpoint manager for emissions data."""
 from __future__ import annotations
 
+from collections.abc import Awaitable, Callable
 from datetime import datetime
-from typing import Awaitable, Callable, TypedDict, cast
+from typing import Any, cast
 
 DEFAULT_MOER_VERSION = "3.0"
-
-
-class EmissionForecast(TypedDict):
-    """Define a type for an emissions forecast."""
-
-    ba: str
-    point_time: str
-    value: float
-    version: str
-
-
-class ForecastedEmissionsResponseType(TypedDict):
-    """Define a type for a response to async_get_forecasted_emissions."""
-
-    generated_at: str
-    forecast: list[EmissionForecast]
-
-
-class GridRegionResponseType(TypedDict):
-    """Define a type for a response to async_get_grid_region."""
-
-    abbrev: str
-    id: int
-    name: str
-
-
-class HistoricalEmissionsResponseType(TypedDict):
-    """Define a type for a response to async_get_historical_emissions."""
-
-    ba: str
-    datatype: str
-    frequency: int
-    market: str
-    point_time: str
-    value: float
-    version: str
-
-
-class RealTimeEmissionsResponseType(TypedDict):
-    """Define a type for a response to async_get_realtime_emissions."""
-
-    ba: str
-    freq: str
-    percent: int
-    point_time: str
-    moer: float | None
 
 
 class EmissionsAPI:
     """Define the manager object."""
 
     def __init__(self, async_request: Callable[..., Awaitable]) -> None:
-        """Initialize."""
+        """Initialize.
+
+        Args:
+            async_request: The request method from the Client object.
+        """
         self._async_request = async_request
 
     async def async_get_grid_region(
         self, latitude: str, longitude: str
-    ) -> GridRegionResponseType:
-        """Return the grid region data for a latitude/longitude."""
+    ) -> dict[str, Any]:
+        """Return the grid region data for a latitude/longitude.
+
+        Args:
+            latitude: A latitude.
+            longitude: A longitude.
+
+        Returns:
+            An API response payload.
+        """
         data = await self._async_request(
             "get", "ba-from-loc", params={"latitude": latitude, "longitude": longitude}
         )
-        return cast(GridRegionResponseType, data)
+        return cast(dict[str, Any], data)
 
     async def async_get_forecasted_emissions(
         self,
@@ -75,8 +42,21 @@ class EmissionsAPI:
         *,
         start_datetime: datetime | None = None,
         end_datetime: datetime | None = None,
-    ) -> RealTimeEmissionsResponseType:
-        """Return the forecasted emissions for a latitude/longitude."""
+    ) -> list[dict[str, Any]]:
+        """Return the forecasted emissions for a latitude/longitude.
+
+        Args:
+            balancing_authority_abbreviation: The abbreviated form of a balancing
+                authority.
+            start_datetime: An optional starting datetime to limit data.
+            end_datetime: An optional ending datetime to limit data.
+
+        Returns:
+            An API response payload.
+
+        Raises:
+            ValueError: Raised on incorrect parameters.
+        """
         if start_datetime and not end_datetime or end_datetime and not start_datetime:
             raise ValueError("You must provided start and end datetimes together")
 
@@ -86,7 +66,7 @@ class EmissionsAPI:
             params["endtime"] = end_datetime.isoformat()
 
         data = await self._async_request("get", "forecast", params=params)
-        return cast(RealTimeEmissionsResponseType, data)
+        return cast(list[dict[str, Any]], data)
 
     async def async_get_historical_emissions(
         self,
@@ -96,8 +76,22 @@ class EmissionsAPI:
         start_datetime: datetime | None = None,
         end_datetime: datetime | None = None,
         moer_version: str = DEFAULT_MOER_VERSION,
-    ) -> HistoricalEmissionsResponseType:
-        """Return the historical emissions for a latitude/longitude."""
+    ) -> dict[str, Any]:
+        """Return the historical emissions for a latitude/longitude.
+
+        Args:
+            latitude: A latitude.
+            longitude: A longitude.
+            start_datetime: An optional starting datetime to limit data.
+            end_datetime: An optional ending datetime to limit data.
+            moer_version: The MOER version to use.
+
+        Returns:
+            An API response payload.
+
+        Raises:
+            ValueError: Raised on incorrect parameters.
+        """
         if start_datetime and not end_datetime or end_datetime and not start_datetime:
             raise ValueError("You must provided start and end datetimes together")
 
@@ -107,13 +101,21 @@ class EmissionsAPI:
             params["endtime"] = end_datetime.isoformat()
 
         data = await self._async_request("get", "data", params=params)
-        return cast(HistoricalEmissionsResponseType, data)
+        return cast(dict[str, Any], data)
 
     async def async_get_realtime_emissions(
         self, latitude: str, longitude: str
-    ) -> RealTimeEmissionsResponseType:
-        """Return the realtime emissions for a latitude/longitude."""
+    ) -> dict[str, Any]:
+        """Return the realtime emissions for a latitude/longitude.
+
+        Args:
+            latitude: A latitude.
+            longitude: A longitude.
+
+        Returns:
+            An API response payload.
+        """
         data = await self._async_request(
             "get", "index", params={"latitude": latitude, "longitude": longitude}
         )
-        return cast(RealTimeEmissionsResponseType, data)
+        return cast(dict[str, Any], data)
