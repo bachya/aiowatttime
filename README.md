@@ -43,7 +43,7 @@ $ script/register
 
 Note that WattTime offers three plans: Visitors, Analyst, and Pro. The type you use
 will determine which elements of this library are available to use. You can read more
-details here: https://www.watttime.org/get-the-data/data-plans/
+details [here][watttime-data-plans].
 
 ## Creating and Using a Client
 
@@ -255,3 +255,4 @@ Thanks to all of [our contributors][contributors] so far!
 [version-badge]: https://img.shields.io/pypi/pyversions/aiowatttime.svg
 [version]: https://pypi.python.org/pypi/aiowatttime
 [watttime]: https://www.watttime.org
+[watttime-data-plans]: https://www.watttime.org/get-the-data/data-plans/
