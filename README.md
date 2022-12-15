@@ -246,7 +246,7 @@ Thanks to all of [our contributors][contributors] so far!
 [issues]: https://github.com/bachya/aiowatttime/issues
 [license-badge]: https://img.shields.io/pypi/l/aiowatttime.svg
 [license]: https://github.com/bachya/aiowatttime/blob/main/LICENSE
-[maintainability-badge]: https://api.codeclimate.com/v1/badges/a03c9e96f19a3dc37f98/maintainability
+[maintainability-badge]: https://api.codeclimate.com/v1/badges/781e64940b1302ae9ac3/maintainability
 [maintainability]: https://codeclimate.com/github/bachya/aiowatttime/maintainability
 [new-issue]: https://github.com/bachya/aiowatttime/issues/new
 [new-issue]: https://github.com/bachya/aiowatttime/issues/new
