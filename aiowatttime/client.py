@@ -65,7 +65,7 @@ class Client:
         request_retries: int = DEFAULT_RETRIES,
         request_retry_delay: int = DEFAULT_RETRY_DELAY,
         session: ClientSession | None = None,
-    ) -> "Client":
+    ) -> Client:
         """Get a fully initialized API client.
 
         Args:
