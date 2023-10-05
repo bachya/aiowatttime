@@ -56,7 +56,7 @@ class Client:
         self.emissions = EmissionsAPI(self._async_request)
 
     @classmethod
-    async def async_login(
+    async def async_login(  # pylint: disable=too-many-arguments
         cls,
         username: str,
         password: str,
@@ -91,7 +91,7 @@ class Client:
         return client
 
     @classmethod
-    async def async_register_new_username(
+    async def async_register_new_username(  # pylint: disable=too-many-arguments
         cls,
         username: str,
         password: str,

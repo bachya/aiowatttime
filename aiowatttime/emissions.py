@@ -68,7 +68,7 @@ class EmissionsAPI:
         data = await self._async_request("get", "forecast", params=params)
         return cast(list[dict[str, Any]], data)
 
-    async def async_get_historical_emissions(
+    async def async_get_historical_emissions(  # pylint: disable=too-many-arguments
         self,
         latitude: str,
         longitude: str,
