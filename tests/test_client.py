@@ -1,4 +1,5 @@
 """Define tests for the client."""
+
 # pylint: disable=protected-access
 import logging
 from typing import Any

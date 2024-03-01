@@ -1,4 +1,5 @@
 """Define an API endpoint manager for emissions data."""
+
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
