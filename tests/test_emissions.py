@@ -1,4 +1,5 @@
 """Define tests for the emissions API endpoints."""
+
 from datetime import datetime
 from typing import Any
 
