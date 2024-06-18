@@ -1,19 +1,37 @@
-[
-  {
-    "generated_at": "2021-08-05T09:05:00+00:00",
-    "forecast": [
+{
+  "data": [
+    {
+      "generated_at": "2022-07-15T00:00:00+00:00",
+      "forecast": [
+        {
+          "point_time": "2022-07-15T00:00:00+00:00",
+          "value": 870
+        },
+        {
+          "point_time": "2022-07-15T00:05:00+00:00",
+          "value": 870
+        },
+        {
+          "point_time": "2022-07-15T00:10:00+00:00",
+          "value": 870
+        }
+      ]
+    }
+  ],
+  "meta": {
+    "data_point_period_seconds": 300,
+    "region": "CAISO_NORTH",
+    "warnings": [
       {
-        "point_time": "2021-08-05T09:10:00+00:00",
-        "ba": "NYISO_NYC",
-        "value": 887.0946245162808,
-        "version": "3.0-1.0.0"
-      },
-      {
-        "point_time": "2021-08-05T09:15:00+00:00",
-        "ba": "NYISO_NYC",
-        "value": 887.2882214363948,
-        "version": "3.0-1.0.0"
+        "type": "EXAMPLE_WARNING",
+        "message": "This is just an example"
       }
-    ]
+    ],
+    "signal_type": "co2_moer",
+    "model": {
+      "date": "2023-03-01"
+    },
+    "units": "lbs_co2_per_mwh",
+    "generated_at_period_seconds": 300
   }
-]
+}

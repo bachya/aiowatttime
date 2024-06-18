@@ -63,16 +63,16 @@ async def test_expired_token(
     """
     async with authenticated_watttime_api_server:
         authenticated_watttime_api_server.add(
-            "api2.watttime.org",
-            "/v2/index",
+            "api.watttime.org",
+            "/v3/signal-index",
             "get",
             response=aiohttp.web_response.json_response(
                 realtime_emissions_response, status=200
             ),
         )
         authenticated_watttime_api_server.add(
-            "api2.watttime.org",
-            "/v2/index",
+            "api.watttime.org",
+            "/v3/signal-index",
             "get",
             response=aresponses.Response(
                 text=forbidden_response,
@@ -81,14 +81,14 @@ async def test_expired_token(
             ),
         )
         authenticated_watttime_api_server.add(
-            "api2.watttime.org",
-            "/v2/login",
+            "api.watttime.org",
+            "/login",
             "get",
             response=aiohttp.web_response.json_response(login_response, status=200),
         )
         authenticated_watttime_api_server.add(
-            "api2.watttime.org",
-            "/v2/index",
+            "api.watttime.org",
+            "/v3/signal-index",
             "get",
             response=aresponses.Response(
                 text=forbidden_response,
@@ -97,14 +97,14 @@ async def test_expired_token(
             ),
         )
         authenticated_watttime_api_server.add(
-            "api2.watttime.org",
-            "/v2/login",
+            "api.watttime.org",
+            "/login",
             "get",
             response=aiohttp.web_response.json_response(login_response, status=200),
         )
         authenticated_watttime_api_server.add(
-            "api2.watttime.org",
-            "/v2/index",
+            "api.watttime.org",
+            "/v3/signal-index",
             "get",
             response=aresponses.Response(
                 text=forbidden_response,
@@ -113,8 +113,8 @@ async def test_expired_token(
             ),
         )
         authenticated_watttime_api_server.add(
-            "api2.watttime.org",
-            "/v2/login",
+            "api.watttime.org",
+            "/login",
             "get",
             response=aiohttp.web_response.json_response(login_response, status=200),
         )
@@ -129,15 +129,11 @@ async def test_expired_token(
             )
 
             # Simulate request #1 having a working token:
-            await client.emissions.async_get_realtime_emissions(
-                "40.6971494", "-74.2598655"
-            )
+            await client.emissions.async_get_realtime_emissions("PSCO")
 
             # Simulate request #2 having an expired token:
             with pytest.raises(InvalidCredentialsError):
-                await client.emissions.async_get_realtime_emissions(
-                    "40.6971494", "-74.2598655"
-                )
+                await client.emissions.async_get_realtime_emissions("PSCO")
 
     aresponses.assert_plan_strictly_followed()
 
@@ -190,8 +186,8 @@ async def test_invalid_credentials(
         forbidden_response: An API response payload.
     """
     aresponses.add(
-        "api2.watttime.org",
-        "/v2/login",
+        "api.watttime.org",
+        "/login",
         "get",
         response=aresponses.Response(
             text=forbidden_response,
@@ -219,8 +215,8 @@ async def test_register_new_username_fail(
         new_user_fail_response: An API response payload.
     """
     aresponses.add(
-        "api2.watttime.org",
-        "/v2/register",
+        "api.watttime.org",
+        "/register",
         "post",
         response=aiohttp.web_response.json_response(new_user_fail_response, status=400),
     )
@@ -251,8 +247,8 @@ async def test_register_new_username_success(
         new_user_success_response: An API response payload.
     """
     aresponses.add(
-        "api2.watttime.org",
-        "/v2/register",
+        "api.watttime.org",
+        "/register",
         "post",
         response=aiohttp.web_response.json_response(
             new_user_success_response, status=200
@@ -283,8 +279,8 @@ async def test_request_password_reset_fail(
     """
     async with authenticated_watttime_api_server:
         authenticated_watttime_api_server.add(
-            "api2.watttime.org",
-            "/v2/password",
+            "api.watttime.org",
+            "/password",
             "get",
             response=aiohttp.web_response.json_response(
                 password_reset_fail_response, status=400
@@ -319,8 +315,8 @@ async def test_successful_token_refresh(
     """
     async with authenticated_watttime_api_server:
         authenticated_watttime_api_server.add(
-            "api2.watttime.org",
-            "/v2/index",
+            "api.watttime.org",
+            "/v3/signal-index",
             "get",
             aresponses.Response(
                 text=forbidden_response,
@@ -333,14 +329,14 @@ async def test_successful_token_refresh(
         login_response["token"] = "efgh5678"  # noqa: S105
 
         authenticated_watttime_api_server.add(
-            "api2.watttime.org",
-            "/v2/login",
+            "api.watttime.org",
+            "/login",
             "get",
             response=aiohttp.web_response.json_response(login_response, status=200),
         )
         authenticated_watttime_api_server.add(
-            "api2.watttime.org",
-            "/v2/index",
+            "api.watttime.org",
+            "/v3/signal-index",
             "get",
             response=aiohttp.web_response.json_response(
                 realtime_emissions_response, status=200
@@ -358,11 +354,9 @@ async def test_successful_token_refresh(
 
             # If we get past here without raising an exception, we know the refresh
             # worked:
-            await client.emissions.async_get_realtime_emissions(
-                "40.6971494", "-74.2598655"
-            )
+            await client.emissions.async_get_realtime_emissions("PSCO")
 
-        # Verify that the token actually changed between retries of /v2/index:
+        # Verify that the token actually changed between retries of /v3/signal-index:
         history = authenticated_watttime_api_server.history
         assert history[1].request.headers["Authorization"] == "Bearer abcd1234"
         assert history[3].request.headers["Authorization"] == "Bearer efgh5678"

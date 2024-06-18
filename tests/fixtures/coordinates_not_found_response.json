@@ -1,5 +1,6 @@
 {
-  "error": "Coordinates not found",
+  "error": "No coverage available for these coordinates and signal_type",
   "latitude": "0",
-  "longitude": "0"
+  "longitude": "0",
+  "signal_type": "co2_moer"
 }

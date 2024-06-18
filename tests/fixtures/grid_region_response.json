@@ -1,5 +1,5 @@
 {
-  "id": 263,
-  "abbrev": "PJM_NJ",
-  "name": "PJM New Jersey"
+  "region": "PSCO",
+  "region_full_name": "Public Service Co of Colorado",
+  "signal_type": "co2_moer"
 }

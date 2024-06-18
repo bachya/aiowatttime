@@ -42,7 +42,7 @@ class UsernameTakenError(WattTimeError):
 
 
 ERROR_MESSAGE_TO_EXCEPTION_MAP = {
-    "Coordinates not found": CoordinatesNotFoundError,
+    "No coverage available": CoordinatesNotFoundError,
     "Invalid scope": InvalidScopeError,
     "That username is taken": UsernameTakenError,
 }

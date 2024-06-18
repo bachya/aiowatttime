@@ -13,7 +13,7 @@ from .const import LOGGER
 from .emissions import EmissionsAPI
 from .errors import InvalidCredentialsError, raise_client_error
 
-API_BASE_URL = "https://api2.watttime.org/v2"
+API_BASE_URL = "https://api.watttime.org"
 
 DEFAULT_RETRIES = 3
 DEFAULT_RETRY_DELAY = 1
