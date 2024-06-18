@@ -41,7 +41,7 @@ warn_unused_ignores = true
 
 [tool.poetry]
 name = "aiowatttime"
-version = "2023.12.0"
+version = "2024.06.0"
 description = "An asyncio-based Python3 library for interacting with WattTime"
 readme = "README.md"
 authors = ["Aaron Bach <bachya1208@gmail.com>"]
