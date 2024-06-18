@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-from typing import Any, cast
+from typing import Any
 
 from aiohttp import BasicAuth, ClientSession, ClientTimeout
 from aiohttp.client_exceptions import ClientError, ContentTypeError
@@ -13,7 +13,7 @@ from .const import LOGGER
 from .emissions import EmissionsAPI
 from .errors import InvalidCredentialsError, raise_client_error
 
-API_BASE_URL = "https://api2.watttime.org/v2"
+API_BASE_URL = "https://api.watttime.org"
 
 DEFAULT_RETRIES = 3
 DEFAULT_RETRY_DELAY = 1
@@ -135,11 +135,11 @@ class Client:
                 "org": organization,
             },
         )
-        return cast(dict[str, Any], data)
+        return data
 
     async def _async_request(
         self, method: str, endpoint: str, **kwargs: dict[str, Any]
-    ) -> dict[str, Any] | list[dict[str, Any]]:
+    ) -> dict[str, Any]:
         """Make an API request.
 
         Args:
@@ -162,7 +162,7 @@ class Client:
         else:
             session = ClientSession(timeout=ClientTimeout(total=DEFAULT_TIMEOUT))
 
-        data: dict[str, Any] | list[dict[str, Any]] = {}
+        data: dict[str, Any] = {}
         retry = 0
 
         while retry < self._request_retries:
@@ -196,7 +196,7 @@ class Client:
                 except ClientError as err:
                     # We always expect a dict when this type of error occurs, but since
                     # it's possible to get a list response, we cast the data:
-                    raise_client_error(endpoint, cast(dict[str, Any], data), err)
+                    raise_client_error(endpoint, data, err)
 
                 break
         else:
@@ -218,14 +218,11 @@ class Client:
             # credentials in the same request:
             self._token = None
 
-            token_resp = cast(
-                dict[str, Any],
-                await self._async_request(
-                    "get",
-                    "login",
-                    auth=BasicAuth(  # type: ignore[arg-type]
-                        self._username, password=self._password
-                    ),
+            token_resp = await self._async_request(
+                "get",
+                "login",
+                auth=BasicAuth(  # type: ignore[arg-type]
+                    self._username, password=self._password
                 ),
             )
 

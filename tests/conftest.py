@@ -24,8 +24,8 @@ def authenticated_watttime_api_server_fixture(
     """
     server = ResponsesMockServer()
     server.add(
-        "api2.watttime.org",
-        "/v2/login",
+        "api.watttime.org",
+        "/login",
         "get",
         response=aiohttp.web_response.json_response(login_response, status=200),
     )

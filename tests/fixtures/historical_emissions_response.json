@@ -1,38 +1,32 @@
-[
-  {
-    "point_time": "2019-02-21T00:15:00.000Z",
-    "value": 844,
-    "frequency": 300,
-    "market": "RTM",
-    "ba": "CAISO_NORTH",
-    "datatype": "MOER",
-    "version": "3.0"
-  },
-  {
-    "point_time": "2019-02-21T00:10:00.000Z",
-    "value": 834,
-    "frequency": 300,
-    "market": "RTM",
-    "ba": "CAISO_NORTH",
-    "datatype": "MOER",
-    "version": "3.0"
-  },
-  {
-    "point_time": "2019-02-21T00:05:00.000Z",
-    "value": 834,
-    "frequency": 300,
-    "market": "RTM",
-    "ba": "CAISO_NORTH",
-    "datatype": "MOER",
-    "version": "3.0"
-  },
-  {
-    "point_time": "2019-02-21T00:00:00.000Z",
-    "value": 844,
-    "frequency": 300,
-    "market": "RTM",
-    "ba": "CAISO_NORTH",
-    "datatype": "MOER",
-    "version": "3.0"
+{
+  "data": [
+    {
+      "point_time": "2022-07-15T00:00:00+00:00",
+      "value": 870,
+      "last_updated": "2023-10-01T00:00:00+00:00",
+      "imputed_data_used": true
+    },
+    {
+      "point_time": "2022-07-15T00:05:00+00:00",
+      "value": 860,
+      "last_updated": "2023-10-01T00:05:00+00:00",
+      "imputed_data_used": true
+    }
+  ],
+  "meta": {
+    "data_point_period_seconds": 300,
+    "region": "CAISO_NORTH",
+    "warnings": [
+      {
+        "type": "EXAMPLE_WARNING",
+        "message": "This is just an example"
+      }
+    ],
+    "signal_type": "co2_moer",
+    "model": {
+      "type": "binned_regression",
+      "date": "2023-03-01"
+    },
+    "units": "lbs_co2_per_mwh"
   }
-]
+}
