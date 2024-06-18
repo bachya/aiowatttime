@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
 from datetime import datetime
-from typing import Any, cast
+from typing import Any
 
 DEFAULT_MOER_VERSION = "3.0"
 
@@ -12,7 +12,7 @@ DEFAULT_MOER_VERSION = "3.0"
 class EmissionsAPI:
     """Define the manager object."""
 
-    def __init__(self, async_request: Callable[..., Awaitable]) -> None:
+    def __init__(self, async_request: Callable[..., Awaitable[dict[str, Any]]]) -> None:
         """Initialize.
 
         Args:
@@ -33,7 +33,7 @@ class EmissionsAPI:
         Returns:
             An API response payload.
         """
-        data = await self._async_request(
+        return await self._async_request(
             "get",
             "v3/region-from-loc",
             params={
@@ -42,7 +42,6 @@ class EmissionsAPI:
                 "signal_type": signal_type,
             },
         )
-        return cast(dict[str, Any], data)
 
     async def async_get_forecasted_emissions(
         self,
@@ -62,7 +61,7 @@ class EmissionsAPI:
         Returns:
             An API response payload.
         """
-        data = await self._async_request(
+        return await self._async_request(
             "get",
             "v3/forecast/historical",
             params={
@@ -72,7 +71,6 @@ class EmissionsAPI:
                 "start": start_datetime.isoformat(),
             },
         )
-        return cast(dict[str, Any], data)
 
     async def async_get_historical_emissions(
         self,
@@ -92,7 +90,7 @@ class EmissionsAPI:
         Returns:
             An API response payload.
         """
-        data = await self._async_request(
+        return await self._async_request(
             "get",
             "v3/historical",
             params={
@@ -102,7 +100,6 @@ class EmissionsAPI:
                 "start": start_datetime.isoformat(),
             },
         )
-        return cast(dict[str, Any], data)
 
     async def async_get_realtime_emissions(self, region: str) -> dict[str, Any]:
         """Return the realtime emissions for a region.
@@ -113,11 +110,10 @@ class EmissionsAPI:
         Returns:
             An API response payload.
         """
-        data = await self._async_request(
+        return await self._async_request(
             "get",
             "v3/signal-index",
             params={
                 "region": region,
             },
         )
-        return cast(dict[str, Any], data)
