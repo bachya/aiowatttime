@@ -196,7 +196,9 @@ async def test_get_realtime_emissions(
 
         async with aiohttp.ClientSession() as session:
             client = await Client.async_login("user", "password", session=session)
-            realtime_data = await client.emissions.async_get_realtime_emissions("PSCO")
+            realtime_data = await client.emissions.async_get_realtime_emissions(
+                "PSCO", "co2_moer"
+            )
             assert realtime_data == {
                 "data": [{"point_time": "2024-06-18T18:40:00+00:00", "value": 96.0}],
                 "meta": {
