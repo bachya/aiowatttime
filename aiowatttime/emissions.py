@@ -101,11 +101,14 @@ class EmissionsAPI:
             },
         )
 
-    async def async_get_realtime_emissions(self, region: str) -> dict[str, Any]:
+    async def async_get_realtime_emissions(
+        self, region: str, signal_type: str
+    ) -> dict[str, Any]:
         """Return the realtime emissions for a region.
 
         Args:
             region: The abbreviated form of a region.
+            signal_type: The signal type.
 
         Returns:
             An API response payload.
@@ -115,5 +118,6 @@ class EmissionsAPI:
             "v3/signal-index",
             params={
                 "region": region,
+                "signal_type": signal_type,
             },
         )

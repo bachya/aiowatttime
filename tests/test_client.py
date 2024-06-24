@@ -129,11 +129,11 @@ async def test_expired_token(
             )
 
             # Simulate request #1 having a working token:
-            await client.emissions.async_get_realtime_emissions("PSCO")
+            await client.emissions.async_get_realtime_emissions("PSCO", "co2_moer")
 
             # Simulate request #2 having an expired token:
             with pytest.raises(InvalidCredentialsError):
-                await client.emissions.async_get_realtime_emissions("PSCO")
+                await client.emissions.async_get_realtime_emissions("PSCO", "co2_moer")
 
     aresponses.assert_plan_strictly_followed()
 
@@ -354,7 +354,7 @@ async def test_successful_token_refresh(
 
             # If we get past here without raising an exception, we know the refresh
             # worked:
-            await client.emissions.async_get_realtime_emissions("PSCO")
+            await client.emissions.async_get_realtime_emissions("PSCO", "co2_moer")
 
         # Verify that the token actually changed between retries of /v3/signal-index:
         history = authenticated_watttime_api_server.history
