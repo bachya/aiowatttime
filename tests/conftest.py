@@ -16,7 +16,7 @@ from .common import load_fixture
 @pytest.fixture(name="authenticated_watttime_api_server")
 def authenticated_watttime_api_server_fixture(
     login_response: dict[str, Any],
-) -> Generator[ResponsesMockServer, None, None]:
+) -> Generator[ResponsesMockServer]:
     """Return a fixture that mocks an authenticated WattTime API server.
 
     Args:
