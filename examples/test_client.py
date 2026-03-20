@@ -14,6 +14,7 @@ USERNAME = "<USERNAME>"
 PASSWORD = "<PASSWORD>"  # noqa: S105
 
 REGION = "PSCO"
+SIGNAL_TYPE = "co2_moer"
 
 
 async def main() -> None:
@@ -22,7 +23,9 @@ async def main() -> None:
     async with ClientSession() as session:
         try:
             client = await Client.async_login(USERNAME, PASSWORD, session=session)
-            realtime_data = await client.emissions.async_get_realtime_emissions(REGION)
+            realtime_data = await client.emissions.async_get_realtime_emissions(
+                REGION, SIGNAL_TYPE
+            )
             _LOGGER.info(realtime_data)
         except WattTimeError as err:
             _LOGGER.error("There was an error: %s", err)

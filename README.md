@@ -56,7 +56,7 @@ from aiowatttime import Client
 
 
 async def main() -> None:
-    client = await Client.login("<USERNAME>", "<PASSWORD>")
+    client = await Client.async_login("<USERNAME>", "<PASSWORD>")
     # ...
 
 
@@ -78,7 +78,7 @@ from aiowatttime import Client
 
 async def main() -> None:
     async with ClientSession() as session:
-        client = await Client.login("<USERNAME>", "<PASSWORD>", session=session)
+        client = await Client.async_login("<USERNAME>", "<PASSWORD>", session=session)
         # ...
 
 
@@ -110,7 +110,7 @@ Getting emissions data will require the region abbreviation (`PSCO` in the examp
 ### Realtime Data
 
 ```python
-await client.emissions.async_get_realtime_emissions("<REGION>")
+await client.emissions.async_get_realtime_emissions("<REGION>", "<SIGNAL_TYPE>")
 # >>>
 {"data": [...]}
 ```
@@ -118,10 +118,13 @@ await client.emissions.async_get_realtime_emissions("<REGION>")
 ### Forecasted Data
 
 ```python
-from datetime import datetime
+from datetime import datetime, timezone
 
 await client.emissions.async_get_forecasted_emissions(
-    "<REGION>", "<SIGNAL_TYPE>", datetime(2021, 1, 1), datetime(2021, 2, 1)
+    "<REGION>",
+    "<SIGNAL_TYPE>",
+    datetime(2021, 1, 1, tzinfo=timezone.utc),
+    datetime(2021, 2, 1, tzinfo=timezone.utc),
 )
 # >>> { "data": [ ... ] }
 ```
@@ -129,8 +132,13 @@ await client.emissions.async_get_forecasted_emissions(
 ### Historical Data
 
 ```python
-await client.emissions.async_get_forecasted_emissions(
-    "<REGION>", "<SIGNAL_TYPE>", datetime(2021, 1, 1), datetime(2021, 2, 1)
+from datetime import datetime, timezone
+
+await client.emissions.async_get_historical_emissions(
+    "<REGION>",
+    "<SIGNAL_TYPE>",
+    datetime(2021, 1, 1, tzinfo=timezone.utc),
+    datetime(2021, 2, 1, tzinfo=timezone.utc),
 )
 # >>> [ { "point_time": "2019-02-21T00:15:00.000Z", "value": 844, ... } ]
 ```
